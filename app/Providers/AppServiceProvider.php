@@ -77,10 +77,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Redirect all emails to a specific address in non-production environments.
         if (config('app.env') !== 'production') {
-            Mail::alwaysTo([
+            Mail::alwaysTo(
                 env('MAIL_OVERRIDE_TO'),
-                env('MAIL_OVERRIDE_NAME', 'Testing'),
-            ]);
+                env('MAIL_OVERRIDE_NAME', 'Test Helper')
+            );
         }
     }
 
