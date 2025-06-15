@@ -6,6 +6,7 @@ use App\Exports\TicketHoursExport;
 use App\Filament\Resources\TicketResource;
 use App\Models\Activity;
 use App\Models\TicketComment;
+use App\Models\TicketNote;
 use App\Models\TicketHour;
 use App\Models\TicketSubscriber;
 use Filament\Forms\Components\RichEditor;
@@ -32,9 +33,14 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public string $tab = 'comments';
 
-    protected $listeners = ['doDeleteComment'];
+    protected $listeners = [
+        'doDeleteComment',
+        'doDeleteNote',
+    ];
 
     public $selectedCommentId;
+
+    public $selectedNoteId; 
 
     public function mount($record): void
     {
@@ -156,14 +162,24 @@ class ViewTicket extends ViewRecord implements HasForms
     public function selectTab(string $tab): void
     {
         $this->tab = $tab;
+
+        // Reset the form state when switching tabs
+        $this->form->fill();
+
+        // Clear on-going editing states
+        $this->selectedCommentId = null;
+        $this->selectedNoteId    = null;
     }
 
     protected function getFormSchema(): array
     {
+        $fieldName   = $this->tab === 'notes' ? 'note' : 'comment';
+        $placeholder = $this->tab === 'notes' ? __('Type a new note') : __('Type a new comment');
+
         return [
-            RichEditor::make('comment')
+            RichEditor::make($fieldName)
                 ->disableLabel()
-                ->placeholder(__('Type a new comment'))
+                ->placeholder($placeholder)
                 ->required()
         ];
     }
@@ -188,6 +204,27 @@ class ViewTicket extends ViewRecord implements HasForms
         $this->notify('success', __('Comment saved'));
     }
 
+    public function submitNote(): void
+    {
+        $data = $this->form->getState();
+        if ($this->selectedNoteId) {
+            TicketNote::where('id', $this->selectedNoteId)
+                ->update([
+                    'content' => $data['note']
+                ]);
+        } else {
+            TicketNote::create([
+                'user_id'   => auth()->user()->id,
+                'ticket_id' => $this->record->id,
+                'content'   => $data['note'],
+            ]);
+        }
+
+        $this->record->refresh();
+        $this->cancelEditNote();
+        $this->notify('success', __('Note saved'));
+    }
+
     public function isAdministrator(): bool
     {
         return $this->record
@@ -204,6 +241,14 @@ class ViewTicket extends ViewRecord implements HasForms
             'comment' => $this->record->comments->where('id', $commentId)->first()?->content
         ]);
         $this->selectedCommentId = $commentId;
+    }
+
+    public function editNote(int $noteId): void
+    {
+        $this->form->fill([
+            'note' => $this->record->notes->where('id', $noteId)->first()?->content
+        ]);
+        $this->selectedNoteId = $noteId;
     }
 
     public function deleteComment(int $commentId): void
@@ -227,6 +272,27 @@ class ViewTicket extends ViewRecord implements HasForms
             ->send();
     }
 
+    public function deleteNote(int $noteId): void
+    {
+        Notification::make()
+            ->warning()
+            ->title(__('Delete confirmation'))
+            ->body(__('Are you sure you want to delete this note?'))
+            ->actions([
+                Action::make('confirm')
+                    ->label(__('Confirm'))
+                    ->color('danger')
+                    ->button()
+                    ->close()
+                    ->emit('doDeleteNote', compact('noteId')),
+                Action::make('cancel')
+                    ->label(__('Cancel'))
+                    ->close()
+            ])
+            ->persistent()
+            ->send();
+    }
+
     public function doDeleteComment(int $commentId): void
     {
         TicketComment::where('id', $commentId)->delete();
@@ -234,9 +300,22 @@ class ViewTicket extends ViewRecord implements HasForms
         $this->notify('success', __('Comment deleted'));
     }
 
+    public function doDeleteNote(int $noteId): void
+    {
+        TicketNote::where('id', $noteId)->delete();
+        $this->record->refresh();
+        $this->notify('success', __('Note deleted'));
+    }
+
     public function cancelEditComment(): void
     {
-        $this->form->fill();
         $this->selectedCommentId = null;
+        $this->form->fill();
+    }
+
+    public function cancelEditNote(): void
+    {
+        $this->selectedNoteId = null;
+        $this->form->fill();
     }
 }

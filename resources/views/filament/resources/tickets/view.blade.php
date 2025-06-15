@@ -228,6 +228,11 @@
                         gap-1 @if($tab === 'comments') border-primary-500 text-primary-500 @else text-gray-700 @endif">
                     {{ __('Comments') }}
                 </button>
+                <button wire:click="selectTab('notes')"
+                        class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500 flex items-center
+                        gap-1 @if($tab === 'notes') border-primary-500 text-primary-500 @else text-gray-700 @endif">
+                    {{ __('Notes') }}
+                </button>
                 <button wire:click="selectTab('activities')"
                         class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500
                         @if($tab === 'activities') border-primary-500 text-primary-500 @else text-gray-700 @endif">
@@ -287,6 +292,53 @@
                         </div>
                         <div class="w-full prose">
                             {!! $comment->content !!}
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+            @if($tab === 'notes')
+                <form wire:submit.prevent="submitNote" class="pb-5">
+                    {{ $this->form }}
+                    <button type="submit"
+                            class="px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded mt-3">
+                        {{ __($selectedNoteId ? 'Edit note' : 'Add note') }}
+                    </button>
+                    @if($selectedNoteId)
+                        <button type="button" wire:click="cancelEditNote"
+                                class="px-3 py-2 bg-warning-500 hover:bg-warning-600 text-white rounded mt-3">
+                            {{ __('Cancel') }}
+                        </button>
+                    @endif
+                </form>
+                @foreach($record->notes->sortByDesc('created_at') as $note)
+                    <div
+                        class="w-full flex flex-col gap-2 @if(!$loop->last) pb-5 mb-5 border-b border-gray-200 @endif ticket-note">
+                        <div class="w-full flex justify-between">
+                            <span class="flex items-center gap-1 text-gray-500 text-sm">
+                                <span class="font-medium flex items-center gap-1">
+                                    <x-user-avatar :user="$note->user"/>
+                                    {{ $note->user->name }}
+                                </span>
+                                <span class="text-gray-400 px-2">|</span>
+                                {{ $note->created_at->format('Y-m-d g:i A') }}
+                                ({{ $note->created_at->diffForHumans() }})
+                            </span>
+                            @if($this->isAdministrator() || $note->user_id === auth()->user()->id)
+                                <div class="actions flex items-center gap-2">
+                                    <button type="button" wire:click="editNote({{ $note->id }})"
+                                            class="text-primary-500 text-xs hover:text-primary-600 hover:underline">
+                                        {{ __('Edit') }}
+                                    </button>
+                                    <span class="text-gray-300">|</span>
+                                    <button type="button" wire:click="deleteNote({{ $note->id }})"
+                                            class="text-danger-500 text-xs hover:text-danger-600 hover:underline">
+                                        {{ __('Delete') }}
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="w-full prose">
+                            {!! $note->content !!}
                         </div>
                     </div>
                 @endforeach

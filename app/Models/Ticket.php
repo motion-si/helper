@@ -114,6 +114,11 @@ class Ticket extends Model implements HasMedia
         return $this->hasMany(TicketComment::class, 'ticket_id', 'id');
     }
 
+    public function notes(): HasMany
+    {
+        return $this->hasMany(TicketNote::class, 'ticket_id', 'id');
+    }
+
     public function subscribers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'ticket_subscribers', 'ticket_id', 'user_id');

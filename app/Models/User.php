@@ -116,7 +116,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     {
         return new Attribute(
             get: function () {
-                return $this->hours->sum('value');
+                return $this->hours()
+                    ->selectRaw('COALESCE(SUM(TIME_TO_SEC(value)), 0) as total')
+                    ->value('total');
             }
         );
     }
