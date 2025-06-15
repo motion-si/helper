@@ -75,7 +75,7 @@ class ProjectResource extends Resource
 
                                                 Forms\Components\TextInput::make('ticket_prefix')
                                                     ->label(__('Ticket prefix'))
-                                                    ->maxLength(3)
+                                                    ->maxLength(10)
                                                     ->columnSpan(2)
                                                     ->unique(Project::class, column: 'ticket_prefix', ignoreRecord: true)
                                                     ->disabled(
@@ -107,11 +107,11 @@ class ProjectResource extends Resource
                                     ->label(__('Project type'))
                                     ->searchable()
                                     ->options([
-                                        'kanban' => __('Kanban'),
-                                        'scrum' => __('Scrum')
+                                        'scrum' => __('Scrum'),
+                                        'kanban' => __('Kanban')
                                     ])
                                     ->reactive()
-                                    ->default(fn() => 'kanban')
+                                    ->default(fn() => 'scrum')
                                     ->helperText(function ($state) {
                                         if ($state === 'kanban') {
                                             return __('Display and move your project forward with issues on a powerful board.');
