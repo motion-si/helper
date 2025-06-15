@@ -163,10 +163,15 @@ class IssueForm extends Component implements HasForms
                 ->columnSpan(2)
                 ->columns(12)
                 ->schema([
-                    Forms\Components\TextInput::make('estimation')
+                    Forms\Components\TimePicker::make('estimation')
                         ->label(__('Estimation time'))
+                        ->withoutSeconds()
+                        ->minutesStep(10)
+                        ->columnSpan(2),
+                    Forms\Components\TextInput::make('credits')
+                        ->label(__('Credits'))
                         ->numeric()
-                        ->columnSpan(4),
+                        ->columnSpan(2),
                 ]),
         ];
     }

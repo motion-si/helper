@@ -97,9 +97,10 @@ class ViewTicket extends ViewRecord implements HasForms
                     [$this->record->owner_id, $this->record->responsible_id]
                 ))
                 ->form([
-                    TextInput::make('time')
+                    TimePicker::make('time')
                         ->label(__('Time to log'))
-                        ->numeric()
+                        ->withoutSeconds()
+                        ->minutesStep(10)
                         ->required(),
                     Select::make('activity_id')
                         ->label(__('Activity'))

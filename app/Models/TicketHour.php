@@ -35,8 +35,17 @@ class TicketHour extends Model
     {
         return new Attribute(
             get: function () {
-                $seconds = $this->value * 3600;
-                return CarbonInterval::seconds($seconds)->cascade()->forHumans();
+                if (!$this->value) {
+                    return null;
+                }
+
+                // TIME (HH:MM:SS)
+                if (preg_match('/^\d{1,2}:\d{2}(:\d{2})?$/', $this->value)) {
+                    $seconds = Carbon::createFromFormat('H:i:s', $this->value)->secondsSinceMidnight();
+                    return CarbonInterval::seconds($seconds)->cascade()->forHumans();
+                }
+
+                return null; // Format unexpected
             }
         );
     }

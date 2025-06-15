@@ -56,9 +56,10 @@ class TimesheetResource extends Resource
                             ->options(function ($get, $set) {
                                 return Activity::all()->pluck('name', 'id')->toArray();
                             }),
-                        TextInput::make('value')
+                        TimePicker::make('value')
                             ->label(__('Time to log'))
-                            ->numeric()
+                            ->withoutSeconds()
+                            ->minutesStep(10)
                             ->required(),
 
                         Textarea::make('comment')

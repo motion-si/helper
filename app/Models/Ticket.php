@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\TicketCreated;
 use App\Notifications\TicketStatusUpdated;
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -161,7 +162,8 @@ class Ticket extends Model implements HasMedia
     {
         return new Attribute(
             get: function () {
-                $seconds = $this->hours->sum('value') * 3600;
+                $seconds = $this->totalLoggedSeconds ?? 0;
+
                 return CarbonInterval::seconds($seconds)->cascade()->forHumans();
             }
         );
@@ -171,7 +173,9 @@ class Ticket extends Model implements HasMedia
     {
         return new Attribute(
             get: function () {
-                return $this->hours->sum('value') * 3600;
+                return $this->hours()
+                    ->selectRaw('COALESCE(SUM(TIME_TO_SEC(value)), 0) as total')
+                    ->value('total');
             }
         );
     }
@@ -180,7 +184,9 @@ class Ticket extends Model implements HasMedia
     {
         return new Attribute(
             get: function () {
-                return $this->hours->sum('value');
+                $seconds = $this->totalLoggedSeconds ?? 0;
+
+                return $seconds / 3600;
             }
         );
     }
@@ -201,7 +207,13 @@ class Ticket extends Model implements HasMedia
                 if (!$this->estimation) {
                     return null;
                 }
-                return $this->estimation * 3600;
+
+                // TIME (HH:MM:SS)
+                if (preg_match('/^\d{1,2}:\d{2}(:\d{2})?$/', $this->estimation)) {
+                    return Carbon::createFromFormat('H:i:s', $this->estimation)->secondsSinceMidnight();
+                }
+
+                return null; // Format unexpected
             }
         );
     }
