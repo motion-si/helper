@@ -7,6 +7,8 @@
     "require": {
         "php": "^8.0.2",
         "ext-iconv": "*",
+        "aws/aws-sdk-php": "^3.263",
+        "aws/aws-sdk-php-laravel": "^3.8",
         "devaslanphp/filament-avatar": "^1.0",
         "doctrine/dbal": "^3.5",
         "dutchcodingcompany/filament-socialite": "^0.2.2",
@@ -32,7 +34,7 @@
         "fakerphp/faker": "^1.9.1",
         "kkomelin/laravel-translatable-string-exporter": "^1.17",
         "laravel/pint": "^1.0",
-        "laravel/sail": "^1.0.1",
+        "laravel/sail": "^1.27",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
         "phpunit/phpunit": "^9.5.10",

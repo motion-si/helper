@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Mail;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -70,8 +71,16 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         // Force HTTPS over HTTP
-        if (env('APP_FORCE_HTTPS') ?? false) {
+        if (config('app.force_https') ?? false) {
             URL::forceScheme('https');
+        }
+
+        // Redirect all emails to a specific address in non-production environments.
+        if (config('app.env') !== 'production') {
+            Mail::alwaysTo([
+                env('MAIL_OVERRIDE_TO'),
+                env('MAIL_OVERRIDE_NAME', 'Testing'),
+            ]);
         }
     }
 
