@@ -12,6 +12,14 @@ use Illuminate\Support\Str;
 
 class PermissionsSeeder extends Seeder
 {
+    /**
+     * Set the execution order for this seeder.
+     */
+    public function executionOrder()
+    {
+        return 20;
+    }
+
     private array $modules = [
         'permission', 'project', 'project status', 'role', 'ticket',
         'ticket priority', 'ticket status', 'ticket type', 'user',

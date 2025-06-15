@@ -7,18 +7,26 @@ use Illuminate\Database\Seeder;
 
 class TicketTypeSeeder extends Seeder
 {
+    /**
+     * Set the execution order for this seeder.
+     */
+    public function executionOrder()
+    {
+        return 30;
+    }
+
     private array $data = [
         [
-            'name' => 'Task',
+            'name' => 'Support',
             'icon' => 'heroicon-o-check-circle',
             'color' => '#00FFFF',
-            'is_default' => true
+            'is_default' => false
         ],
         [
             'name' => 'Evolution',
             'icon' => 'heroicon-o-clipboard-list',
             'color' => '#008000',
-            'is_default' => false
+            'is_default' => true
         ],
         [
             'name' => 'Bug',

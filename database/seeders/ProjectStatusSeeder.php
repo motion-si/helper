@@ -2,37 +2,37 @@
 
 namespace Database\Seeders;
 
-use App\Models\TicketPriority;
+use App\Models\ProjectStatus;
 use Illuminate\Database\Seeder;
 
-class TicketPrioritySeeder extends Seeder
+class ProjectStatusSeeder extends Seeder
 {
     /**
      * Set the execution order for this seeder.
      */
     public function executionOrder()
     {
-        return 40;
+        return 70;
     }
 
     private array $data = [
         [
-            'name' => 'Low',
-            'color' => '#008000',
+            'name' => 'Backlog',
+            'color' => '#cecece',
             'is_default' => false
         ],
         [
-            'name' => 'Normal',
+            'name' => 'Development',
             'color' => '#000aff',
+            'is_default' => false
+        ],
+        [
+            'name' => 'Active',
+            'color' => '#008000',
             'is_default' => true
         ],
         [
-            'name' => 'High',
-            'color' => '#faff00',
-            'is_default' => false
-        ],
-        [
-            'name' => 'Critical',
+            'name' => 'Deprecated',
             'color' => '#ff0000',
             'is_default' => false
         ],
@@ -46,7 +46,7 @@ class TicketPrioritySeeder extends Seeder
     public function run()
     {
         foreach ($this->data as $item) {
-            TicketPriority::firstOrCreate($item);
+            ProjectStatus::firstOrCreate($item);
         }
     }
 }

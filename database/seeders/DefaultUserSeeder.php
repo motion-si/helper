@@ -9,16 +9,24 @@ use Illuminate\Database\Seeder;
 class DefaultUserSeeder extends Seeder
 {
     /**
+     * Set the execution order for this seeder.
+     */
+    public function executionOrder()
+    {
+        return 10;
+    }
+
+    /**
      * Run the database seeds.
      *
      * @return void
      */
     public function run()
     {
-        if (User::where('email', 'john.doe@helper.app')->count() == 0) {
+        if (User::where('email', 'suporte@motionsi.com.br')->count() == 0) {
             $user = User::create([
-                'name' => 'John DOE',
-                'email' => 'john.doe@helper.app',
+                'name' => 'Suporte Motion SI',
+                'email' => 'suporte@motionsi.com.br',
                 'password' => bcrypt('Passw@rd'),
                 'email_verified_at' => now()
             ]);

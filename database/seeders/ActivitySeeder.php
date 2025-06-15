@@ -7,6 +7,14 @@ use Illuminate\Database\Seeder;
 
 class ActivitySeeder extends Seeder
 {
+    /**
+     * Set the execution order for this seeder.
+     */
+    public function executionOrder()
+    {
+        return 60;
+    }
+
     private array $data = [
         [
             'name' => 'Programming',
@@ -15,6 +23,14 @@ class ActivitySeeder extends Seeder
         [
             'name' => 'Testing',
             'description' => 'Testing related activities'
+        ],
+        [
+            'name' => 'Scoping',
+            'description' => 'Activities related to scoping and planning'
+        ],
+        [
+            'name' => 'Meeting',
+            'description' => 'Activities related to meetings'
         ],
         [
             'name' => 'Learning',
