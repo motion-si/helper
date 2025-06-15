@@ -20,14 +20,11 @@ class WeeklyReport extends BarChartWidget
         'lg' => 3
     ];
 
-    public function __construct($id = null)
-    {
-        $weekDaysData = $this->getWeekStartAndFinishDays();
+    public ?string $filter;
 
-        $this->filter = $weekDaysData['weekStartDate'] . ' - ' . $weekDaysData['weekEndDate'];
+    protected $listeners = ['monthUpdated' => 'onMonthUpdated'];
 
-        parent::__construct($id);
-    }
+    public array $weeksList = [];
 
     protected function getHeading(): string
     {
@@ -36,15 +33,14 @@ class WeeklyReport extends BarChartWidget
 
     protected function getData(): array
     {
-        $weekDaysData = explode(' - ', $this->filter);
+        [$weekStart, $weekEnd] = explode('|', $this->filter);
 
         $collection = $this->filter(auth()->user(), [
-            'year' => null,
-            'weekStartDate' => $weekDaysData[0],
-            'weekEndDate' => $weekDaysData[1]
+            'weekStartDate' => $weekStart,
+            'weekEndDate'   => $weekEnd,
         ]);
 
-        $dates = $this->buildDatesRange($weekDaysData[0], $weekDaysData[1]);
+        $dates = $this->buildDatesRange($weekStart, $weekEnd);
 
         $datasets = $this->buildRapport($collection, $dates);
 
@@ -67,7 +63,67 @@ class WeeklyReport extends BarChartWidget
 
     protected function getFilters(): ?array
     {
-        return $this->yearWeeks();
+        return $this->weeksList;
+    }
+
+    protected static ?array $options = [
+        'plugins' => [
+            'legend' => [
+                'display' => true,
+            ],
+        ],
+        'scales' => [
+            'y' => [
+                'beginAtZero' => true,
+                'title' => [
+                    'display' => true,
+                    'text' => 'Minutes',
+                ],
+            ],
+        ],
+    ];
+
+    public function mount(): void
+    {
+        $month = Carbon::now();
+        $this->weeksList = $this->weeksOfMonth($month);
+
+        $today = Carbon::today()->toDateString();
+        $this->filter = collect($this->weeksList)->keys()->first(function ($range) use ($today) {
+            [$from, $to] = explode('|', $range);
+            return $today >= $from && $today <= $to;
+        }) ?? array_key_first($this->weeksList);
+
+        parent::mount();
+    }
+
+    protected function weeksOfMonth(Carbon $month): array
+    {
+        $weeks  = [];
+        $cursor = $month->copy()->startOfMonth()->startOfWeek(Carbon::MONDAY);
+
+        while ($cursor->lessThanOrEqualTo($month->copy()->endOfMonth())) {
+            $weekStart = $cursor->copy();
+            $weekEnd   = $cursor->copy()->endOfWeek();
+
+            if ($weekStart->month !== $month->month && $weekEnd->month !== $month->month) {
+                $cursor->addWeek();
+                continue;
+            }
+
+            $value = $weekStart->toDateString() . '|' . $weekEnd->toDateString();
+            $label = sprintf(
+                '#%02d – %s – %s',
+                $weekStart->isoWeek(),
+                $weekStart->format("d/m"),
+                $weekEnd->format("d/m")
+            );
+
+            $weeks[$value] = $label;
+            $cursor->addWeek();
+        }
+
+        return $weeks;
     }
 
     protected function buildRapport(Collection $collection, array $dates): array
@@ -81,16 +137,16 @@ class WeeklyReport extends BarChartWidget
 
     protected function filter(User $user, array $params)
     {
+        $start = Carbon::parse($params['weekStartDate'])->startOfDay();
+        $end = Carbon::parse($params['weekEndDate'])->endOfDay();
+
         return TicketHour::select([
-            DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d') as day"),
-            DB::raw('SUM(value) as value'),
-        ])
-            ->whereBetween('created_at', [$params['weekStartDate'], $params['weekEndDate']])
-            ->whereRaw(
-                DB::raw("YEAR(created_at)=" . (is_null($params['year']) ? Carbon::now()->format('Y') : $params['year']))
-            )
+                DB::raw('DATE(created_at) as day'),
+                DB::raw('ROUND(SUM(TIME_TO_SEC(value)) / 60) as value'),
+            ])
+            ->whereBetween('created_at', [$start, $end])
             ->where('user_id', $user->id)
-            ->groupBy(DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d')"))
+            ->groupBy(DB::raw('DATE(created_at)'))
             ->get();
     }
 
@@ -139,5 +195,12 @@ class WeeklyReport extends BarChartWidget
             'weekStartDate' => $now->startOfWeek()->format('Y-m-d'),
             'weekEndDate' => $now->endOfWeek()->format('Y-m-d')
         ];
+    }
+
+    public function onMonthUpdated(string $ym): void
+    {
+        $month = Carbon::createFromFormat('Y-m', $ym);
+        $this->weeksList = $this->weeksOfMonth($month);
+        $this->filter    = array_key_first($this->weeksList);
     }
 }

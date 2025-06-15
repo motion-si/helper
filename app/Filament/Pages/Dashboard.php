@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\FavoriteProjects;
 use App\Filament\Widgets\LatestActivities;
 use App\Filament\Widgets\LatestComments;
+use App\Filament\Widgets\LatestNotes;
 use App\Filament\Widgets\LatestProjects;
 use App\Filament\Widgets\LatestTickets;
 use App\Filament\Widgets\TicketsByPriority;
@@ -28,6 +29,7 @@ class Dashboard extends BasePage
             FavoriteProjects::class,
             LatestActivities::class,
             LatestComments::class,
+            LatestNotes::class,
             LatestProjects::class,
             LatestTickets::class,
             TicketsByPriority::class,

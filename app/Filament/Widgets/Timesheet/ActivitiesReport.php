@@ -19,7 +19,11 @@ class ActivitiesReport extends BarChartWidget
         'lg' => 3
     ];
 
-    public ?string $filter = '2023';
+    public ?string $filter;
+
+    protected $listeners = ['yearUpdated' => 'onYearUpdated'];
+
+    private ?string $currentYear = null;
 
     protected function getHeading(): string
     {
@@ -28,10 +32,50 @@ class ActivitiesReport extends BarChartWidget
 
     protected function getFilters(): ?array
     {
-        return [
-            2022 => 2022,
-            2023 => 2023
-        ];
+        $year = $this->currentYear ?? Carbon::now()->year;
+
+        $dates = TicketHour::selectRaw('MONTH(created_at) as m')
+            ->whereYear('created_at', $year)
+            ->distinct()
+            ->orderBy('m')
+            ->get()
+            ->mapWithKeys(function ($row) use ($year) {
+                $carbon = Carbon::create($year, $row->m);
+                $value  = $carbon->format('Y-m');
+                $label  = $carbon->translatedFormat('F/Y');
+                return [$value => $label];
+            })
+            ->toArray();
+
+        if ($dates === []) {
+            $carbon = Carbon::create($year, 1);
+            $dates  = [$carbon->format('Y-m') => $carbon->translatedFormat('F/Y')];
+        }
+
+        return $dates;
+    }
+
+    protected static ?array $options = [
+        'plugins' => [
+            'legend' => [
+                'display' => true,
+            ],
+        ],
+        'scales' => [
+            'y' => [
+                'beginAtZero' => true,
+                'title' => [
+                    'display' => true,
+                    'text' => 'Minutes',
+                ],
+            ],
+        ],
+    ];
+
+    public function updatedFilter(): void
+    {
+        parent::updatedFilter();
+        $this->emit('monthUpdated', $this->filter);
     }
 
     protected function getData(): array
@@ -74,18 +118,36 @@ class ActivitiesReport extends BarChartWidget
         return $datasets;
     }
 
+    public function mount(): void
+    {
+        $this->filter = Carbon::now()->format('Y-m');
+
+        parent::mount();
+    }
+
     protected function filter(User $user, array $params): Collection
     {
+        [$year, $month] = explode('-', $this->filter);
+
         return TicketHour::with('activity')
             ->select([
                 'activity_id',
-                DB::raw('SUM(value) as value'),
+                DB::raw('ROUND(SUM(TIME_TO_SEC(value)) / 60) as value'),
             ])
-            ->whereRaw(
-                DB::raw("YEAR(created_at)=" . (is_null($params['year']) ? Carbon::now()->format('Y') : $params['year']))
-            )
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
             ->where('user_id', $user->id)
             ->groupBy('activity_id')
             ->get();
+    }
+
+    public function onYearUpdated(string $year): void
+    {
+        $this->currentYear = $year;
+
+        $months = $this->getFilters();
+        $this->filter = array_key_first($months);
+
+        $this->emit('monthUpdated', $this->filter);
     }
 }

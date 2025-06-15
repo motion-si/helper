@@ -18,7 +18,9 @@ class MonthlyReport extends BarChartWidget
         return __('Logged time monthly');
     }
 
-    public ?string $filter = '2023';
+    public ?string $filter;
+
+    protected $listeners = [];
 
     protected function getData(): array
     {
@@ -45,18 +47,41 @@ class MonthlyReport extends BarChartWidget
         ];
     }
 
+    public function mount(): void
+    {
+        $this->filter = (string) Carbon::now()->year;
+
+        parent::mount();
+    }
+
     protected function getFilters(): ?array
     {
-        return [
-            2022 => 2022,
-            2023 => 2023
-        ];
+        $years = TicketHour::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->sortDesc()
+            ->toArray();
+
+        if (! in_array(Carbon::now()->year, $years, true)) {
+            array_unshift($years, Carbon::now()->year);
+        }
+
+        return array_combine($years, $years);
     }
 
     protected static ?array $options = [
         'plugins' => [
             'legend' => [
                 'display' => true,
+            ],
+        ],
+        'scales' => [
+            'y' => [
+                'beginAtZero' => true,
+                'title' => [
+                    'display' => true,
+                    'text' => 'Minutes',
+                ],
             ],
         ],
     ];
@@ -71,7 +96,7 @@ class MonthlyReport extends BarChartWidget
     {
         return TicketHour::select([
             DB::raw("DATE_FORMAT(created_at,'%m') as month"),
-            DB::raw('SUM(value) as value'),
+            DB::raw('ROUND(SUM(TIME_TO_SEC(value)) / 60) as value'),
         ])
             ->whereRaw(
                 DB::raw("YEAR(created_at)=" . (is_null($params['year']) ? Carbon::now()->format('Y') : $params['year']))
@@ -79,6 +104,12 @@ class MonthlyReport extends BarChartWidget
             ->where('user_id', $user->id)
             ->groupBy(DB::raw("DATE_FORMAT(created_at,'%m')"))
             ->get();
+    }
+
+    public function updatedFilter(): void
+    {
+        parent::updatedFilter();
+        $this->emit('yearUpdated', $this->filter);
     }
 
     protected function getDatasets(array $rapportData): array
