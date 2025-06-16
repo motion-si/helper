@@ -206,6 +206,23 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function submitNote(): void
     {
+        $user = auth()->user();
+        if ($this->selectedNoteId) {
+            $note = TicketNote::find($this->selectedNoteId);
+            if (
+                !$user ||
+                $user->hasRole('Customer') ||
+                !$user->can('Update ticket note', $note) ||
+                $note?->user_id !== $user->id
+            ) {
+                abort(403);
+            }
+        } else {
+            if (!$user || $user->hasRole('Customer') || !$user->can('Create ticket note')) {
+                abort(403);
+            }
+        }
+
         $data = $this->form->getState();
         if ($this->selectedNoteId) {
             TicketNote::where('id', $this->selectedNoteId)
@@ -245,8 +262,20 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function editNote(int $noteId): void
     {
+        $user = auth()->user();
+        $note = $this->record->notes->where('id', $noteId)->first();
+
+        if (
+            !$user ||
+            $user->hasRole('Customer') ||
+            !$user->can('Update ticket note', $note) ||
+            $note?->user_id !== $user->id
+        ) {
+            abort(403);
+        }
+
         $this->form->fill([
-            'note' => $this->record->notes->where('id', $noteId)->first()?->content
+            'note' => $note?->content
         ]);
         $this->selectedNoteId = $noteId;
     }
@@ -274,6 +303,18 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function deleteNote(int $noteId): void
     {
+        $user = auth()->user();
+        $note = $this->record->notes->where('id', $noteId)->first();
+
+        if (
+            !$user ||
+            $user->hasRole('Customer') ||
+            !$user->can('Delete ticket note', $note) ||
+            $note?->user_id !== $user->id
+        ) {
+            abort(403);
+        }
+
         Notification::make()
             ->warning()
             ->title(__('Delete confirmation'))
