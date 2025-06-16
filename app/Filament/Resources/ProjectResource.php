@@ -164,6 +164,12 @@ class ProjectResource extends Resource
                     ->sortable()
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('client.abbreviation')
+                    ->label(__('Client'))
+                    ->sortable()
+                    ->visible(fn () => !auth()->user()->hasRole('Customer'))
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('owner.name')
                     ->label(__('Project owner'))
                     ->sortable()
@@ -180,28 +186,18 @@ class ProjectResource extends Resource
                         '))
                     ->sortable()
                     ->searchable(),
-
-                Tables\Columns\TagsColumn::make('users.name')
-                    ->label(__('Affected users'))
-                    ->limit(2),
-
-                Tables\Columns\BadgeColumn::make('type')
-                    ->enum([
-                        'kanban' => __('Kanban'),
-                        'scrum' => __('Scrum')
-                    ])
-                    ->colors([
-                        'secondary' => 'kanban',
-                        'warning' => 'scrum',
-                    ]),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('Created at'))
-                    ->dateTime()
-                    ->sortable()
-                    ->searchable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('name')
+                    ->label(__('Project name'))
+                    ->multiple()
+                    ->options(fn() => Project::all()->pluck('name', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('client_id')
+                    ->label(__('Client'))
+                    ->multiple()
+                    ->options(fn() => Client::all()->pluck('name', 'id')->toArray()),
+
                 Tables\Filters\SelectFilter::make('owner_id')
                     ->label(__('Owner'))
                     ->multiple()

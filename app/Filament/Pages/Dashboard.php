@@ -28,12 +28,12 @@ class Dashboard extends BasePage
     {
         return [
             ActiveSprints::class,
-            FavoriteProjects::class,
+            LatestTickets::class,
             LatestActivities::class,
             LatestComments::class,
             LatestNotes::class,
+            FavoriteProjects::class,
             LatestProjects::class,
-            LatestTickets::class,
             TicketsByPriority::class,
             TicketsByType::class,
             TicketTimeLogged::class,

@@ -13,7 +13,7 @@ class ActiveSprints extends BaseWidget
     protected int|string|array $columnSpan = [
         'sm' => 1,
         'md' => 6,
-        'lg' => 3,
+        'lg' => 6,
     ];
 
     public function mount(): void
@@ -44,6 +44,7 @@ class ActiveSprints extends BaseWidget
             Tables\Columns\TextColumn::make('name')->label(__('Sprint name')),
             Tables\Columns\TextColumn::make('client.name')->label(__('Client')),
             Tables\Columns\TextColumn::make('ends_at')->label(__('Sprint end date'))->date(),
+            Tables\Columns\TextColumn::make('remaining')->label(__('Remaining'))->suffix(fn($record) => $record->remaining ? ' '. __('days') : ''),
         ];
     }
 }

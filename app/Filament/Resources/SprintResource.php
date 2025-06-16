@@ -95,34 +95,64 @@ class SprintResource extends Resource
                     ->label(__('Sprint name'))
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('client.name')
-                    ->label(__('Client')),
+                Tables\Columns\TextColumn::make('client.abbreviation')
+                    ->label(__('Client'))
+                    ->sortable()
+                    ->visible(fn () => !auth()->user()->hasRole('Customer'))
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('starts_at')
                     ->label(__('Sprint start date'))
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('ends_at')
                     ->label(__('Sprint end date'))
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('tickets_credits')
-                    ->label(__('Tickets Credits')),
+                    ->label(__('Tickets Credits'))
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('extra_credits')
-                    ->label(__('Extra Credits')),
+                    ->label(__('Extra Credits'))
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('total_credits')
-                    ->label(__('Total Credits')),
+                    ->label(__('Total Credits'))
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\IconColumn::make('billed')
                     ->label(__('Billed'))
-                    ->boolean(),
+                    ->boolean()
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('started_at')
                     ->label(__('Sprint started at'))
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('ended_at')
                     ->label(__('Sprint ended at'))
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('remaining')
                     ->label(__('Remaining'))
-                    ->suffix(fn($record) => $record->remaining ? ' '. __('days') : ''),
+                    ->suffix(fn($record) => $record->remaining ? ' '. __('days') : '')
+                    ->sortable()
+                    ->searchable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('name')
+                    ->label(__('Sprint Name'))
+                    ->multiple()
+                    ->options(fn() => Sprint::all()->pluck('name', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('client_id')
+                    ->label(__('Client'))
+                    ->multiple()
+                    ->options(fn() => Client::all()->pluck('name', 'id')->toArray()),
             ])
             ->actions([
                 Tables\Actions\Action::make('start')

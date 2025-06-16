@@ -262,6 +262,11 @@ class TicketResource extends Resource
                 ->searchable();
         }
         $columns = array_merge($columns, [
+            Tables\Columns\TextColumn::make('code')
+                ->label(__('Ticket code'))
+                ->sortable()
+                ->searchable(),
+
             Tables\Columns\TextColumn::make('name')
                 ->label(__('Ticket name'))
                 ->sortable()
@@ -338,6 +343,21 @@ class TicketResource extends Resource
                         ->orWhereHas('users', function ($query) {
                             return $query->where('users.id', auth()->user()->id);
                         })->pluck('name', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('code')
+                    ->label(__('Ticket code'))
+                    ->multiple()
+                    ->options(fn() => Ticket::all()->pluck('code', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('name')
+                    ->label(__('Ticket name'))
+                    ->multiple()
+                    ->options(fn() => Ticket::all()->pluck('name', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('client_id')
+                    ->label(__('Client'))
+                    ->multiple()
+                    ->options(fn() => Client::all()->pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('owner_id')
                     ->label(__('Owner'))
