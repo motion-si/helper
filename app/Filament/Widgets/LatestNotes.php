@@ -29,7 +29,9 @@ class LatestNotes extends BaseWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->can('List tickets');
+        return auth()->user()
+            && !auth()->user()->hasRole('Customer')
+            && auth()->user()->can('List ticket notes');
     }
 
     protected function isTablePaginationEnabled(): bool
