@@ -228,11 +228,13 @@
                         gap-1 @if($tab === 'comments') border-primary-500 text-primary-500 @else text-gray-700 @endif">
                     {{ __('Comments') }}
                 </button>
-                <button wire:click="selectTab('notes')"
-                        class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500 flex items-center
-                        gap-1 @if($tab === 'notes') border-primary-500 text-primary-500 @else text-gray-700 @endif">
-                    {{ __('Notes') }}
-                </button>
+                @if(auth()->user()->can('View ticket note') && !auth()->user()->hasRole('Customer'))
+                    <button wire:click="selectTab('notes')"
+                            class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500 flex items-center
+                            gap-1 @if($tab === 'notes') border-primary-500 text-primary-500 @else text-gray-700 @endif">
+                        {{ __('Notes') }}
+                    </button>
+                @endif
                 <button wire:click="selectTab('activities')"
                         class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500
                         @if($tab === 'activities') border-primary-500 text-primary-500 @else text-gray-700 @endif">
@@ -296,7 +298,7 @@
                     </div>
                 @endforeach
             @endif
-            @if($tab === 'notes')
+            @if(auth()->user()->can('View ticket note') && !auth()->user()->hasRole('Customer') && $tab === 'notes')
                 <form wire:submit.prevent="submitNote" class="pb-5">
                     {{ $this->form }}
                     <button type="submit"
