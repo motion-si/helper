@@ -21,7 +21,7 @@ class SprintSeeder extends Seeder
             'starts_at' => '2025-06-01',
             'ends_at' => '2025-06-30',
             'description' => '<p>Test example #1</p>',
-            'project_id' => 1,
+            'client_id' => 2,
         ],
     ];
 

@@ -30,12 +30,7 @@ class SprintPolicy
      */
     public function view(User $user, Sprint $sprint)
     {
-        return $user->can('View sprint')
-            && (
-                $sprint->project->owner_id === $user->id
-                ||
-                $sprint->project->users()->where('users.id', $user->id)->count()
-            );
+        return $user->can('View sprint');
     }
 
     /**
@@ -58,14 +53,7 @@ class SprintPolicy
      */
     public function update(User $user, Sprint $sprint)
     {
-        return $user->can('Update sprint')
-            && (
-                $sprint->project->owner_id === $user->id
-                ||
-                $sprint->project->users()->where('users.id', $user->id)
-                    ->where('role', config('system.projects.affectations.roles.can_manage'))
-                    ->count()
-            );
+        return $user->can('Update sprint');
     }
 
     /**

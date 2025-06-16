@@ -15,8 +15,17 @@ class Sprint extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 'starts_at', 'ends_at', 'description',
-        'project_id', 'started_at', 'ended_at'
+        'name',
+        'starts_at',
+        'ends_at',
+        'description',
+        'client_id',
+        'tickets_credits',
+        'extra_credits',
+        'total_credits',
+        'billed',
+        'started_at',
+        'ended_at',
     ];
 
     protected $casts = [
@@ -24,27 +33,20 @@ class Sprint extends Model
         'ends_at' => 'date',
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'billed' => 'boolean',
     ];
 
-    public static function boot()
+    protected static function booted()
     {
-        parent::boot();
-
-        static::created(function (Sprint $item) {
-            $epic = Epic::create([
-                'name' => $item->name,
-                'starts_at' => $item->starts_at,
-                'ends_at' => $item->ends_at,
-                'project_id' => $item->project_id
-            ]);
-            $item->epic_id = $epic->id;
-            $item->save();
+        static::saving(function (Sprint $item) {
+            $item->tickets_credits = $item->tickets()->sum('credits');
+            $item->total_credits = ($item->tickets_credits ?? 0) + ($item->extra_credits ?? 0);
         });
     }
 
-    public function project(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id');
+        return $this->belongsTo(Client::class, 'client_id', 'id');
     }
 
     public function tickets(): HasMany
