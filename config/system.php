@@ -93,21 +93,21 @@ return [
             'roles' => [
 
                 // Default role
-                'default' => 'employee',
+                'default' => 'customer',
 
                 // Role that can manage
                 'can_manage' => 'administrator',
 
                 // Roles list
                 'list' => [
-                    'employee' => 'Employee',
+                    'project_manager' => 'Project Manager',
+                    'developer' => 'Developer',
                     'customer' => 'Customer',
-                    'administrator' => 'Administrator'
                 ],
 
                 // Roles colors
                 'colors' => [
-                    'primary' => 'employee',
+                    'primary' => 'developer',
                     'warning' => 'customer',
                     'danger' => 'administrator'
                 ],

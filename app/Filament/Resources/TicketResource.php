@@ -12,6 +12,7 @@ use App\Models\TicketRelation;
 use App\Models\TicketStatus;
 use App\Models\TicketType;
 use App\Models\User;
+use App\Models\Client;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Pages\CreateRecord;
@@ -109,17 +110,29 @@ class TicketResource extends Resource
                                             ->maxLength(255),
                                     ]),
 
-                                Forms\Components\Select::make('owner_id')
-                                    ->label(__('Ticket owner'))
-                                    ->searchable()
-                                    ->options(fn() => User::all()->pluck('name', 'id')->toArray())
-                                    ->default(fn() => auth()->user()->id)
-                                    ->required(),
+                                Forms\Components\Grid::make()
+                                    ->columns(3)
+                                    ->columnSpan(2)
+                                    ->schema([
+                                        Forms\Components\Select::make('client_id')
+                                            ->label(__('Client'))
+                                            ->searchable()
+                                            ->options(fn () => Client::all()->pluck('name', 'id')->toArray())
+                                            ->visible(fn () => !auth()->user()->hasRole('Customer'))
+                                            ->required(fn () => !auth()->user()->hasRole('Customer')),
 
-                                Forms\Components\Select::make('responsible_id')
-                                    ->label(__('Ticket responsible'))
-                                    ->searchable()
-                                    ->options(fn() => User::all()->pluck('name', 'id')->toArray()),
+                                        Forms\Components\Select::make('owner_id')
+                                            ->label(__('Ticket owner'))
+                                            ->searchable()
+                                            ->options(fn() => User::all()->pluck('name', 'id')->toArray())
+                                            ->default(fn() => auth()->user()->id)
+                                            ->required(),
+
+                                        Forms\Components\Select::make('responsible_id')
+                                            ->label(__('Ticket responsible'))
+                                            ->searchable()
+                                            ->options(fn() => User::all()->pluck('name', 'id')->toArray()),
+                                    ]),
 
                                 Forms\Components\Grid::make()
                                     ->columns(3)
@@ -254,6 +267,12 @@ class TicketResource extends Resource
                 ->sortable()
                 ->searchable(),
 
+            Tables\Columns\TextColumn::make('client.abbreviation')
+                ->label(__('Client'))
+                ->sortable()
+                ->visible(fn () => !auth()->user()->hasRole('Customer'))
+                ->searchable(),
+
             Tables\Columns\TextColumn::make('owner.name')
                 ->label(__('Owner'))
                 ->sortable()
@@ -357,7 +376,8 @@ class TicketResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\CommentsRelationManager::class,
+            RelationManagers\TicketNotesRelationManager::class,
         ];
     }
 

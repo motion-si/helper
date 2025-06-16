@@ -23,6 +23,10 @@ class TicketNote extends Model
     {
         parent::boot();
 
+        static::creating(function (TicketNote $item) {
+            $item->user_id = $item->user_id ?? auth()->id();
+        });
+
         static::created(function (TicketNote $item) {
             foreach ($item->ticket->watchers as $user) {
                 $user->notify(new TicketNoted($item));

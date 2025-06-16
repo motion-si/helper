@@ -23,6 +23,10 @@ class TicketComment extends Model
     {
         parent::boot();
 
+        static::creating(function (TicketComment $item) {
+            $item->user_id = $item->user_id ?? auth()->id();
+        });
+
         static::created(function (TicketComment $item) {
             foreach ($item->ticket->watchers as $user) {
                 $user->notify(new TicketCommented($item));

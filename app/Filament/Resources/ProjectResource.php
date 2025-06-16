@@ -10,6 +10,7 @@ use App\Models\ProjectFavorite;
 use App\Models\ProjectStatus;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\Client;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Form;
@@ -102,6 +103,13 @@ class ProjectResource extends Resource
                                 Forms\Components\RichEditor::make('description')
                                     ->label(__('Project description'))
                                     ->columnSpan(3),
+
+                                Forms\Components\Select::make('client_id')
+                                    ->label(__('Client'))
+                                    ->searchable()
+                                    ->options(fn() => Client::all()->pluck('name', 'id')->toArray())
+                                    ->default(fn() => Client::first()?->id)
+                                    ->required(),
 
                                 Forms\Components\Select::make('type')
                                     ->label(__('Project type'))

@@ -30,15 +30,22 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket)
     {
+        if ($user->hasRole('Customer')) {
+            return $user->can('View ticket') && $ticket->owner_id === $user->id;
+        }
+
+        // Project Owners can view all tickets in their project
+        if ($ticket->project && $ticket->project->owner_id === $user->id) {
+            return $user->can('View ticket');
+        }
+
         return $user->can('View ticket')
             && (
                 $ticket->owner_id === $user->id
                 ||
                 $ticket->responsible_id === $user->id
                 ||
-                $ticket->project->users()->where('users.id', auth()->user()->id)->count()
-                ||
-                $ticket->project->owner_id === $user->id
+                $ticket->project->users()->where('users.id', $user->id)->count()
             );
     }
 
@@ -50,6 +57,7 @@ class TicketPolicy
      */
     public function create(User $user)
     {
+        // Client association will be handled in the Resource/Controller layer
         return $user->can('Create ticket');
     }
 
@@ -62,15 +70,19 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket)
     {
+        if ($user->hasRole('Customer')) {
+            return $user->can('Update ticket') && $ticket->owner_id === $user->id;
+        }
+
         return $user->can('Update ticket')
             && (
                 $ticket->owner_id === $user->id
                 ||
                 $ticket->responsible_id === $user->id
                 ||
-                $ticket->project->users()->where('users.id', auth()->user()->id)->count()
+                $ticket->project->users()->where('users.id', $user->id)->count()
                 ||
-                $ticket->project->owner_id === $user->id
+                ($ticket->project && $ticket->project->owner_id === $user->id) // Project owner can update
             );
     }
 
@@ -84,5 +96,62 @@ class TicketPolicy
     public function delete(User $user, Ticket $ticket)
     {
         return $user->can('Delete ticket');
+    }
+
+    // TicketNote Policies
+    public function viewTicketNote(User $user, Ticket $ticket)
+    {
+        if ($user->hasRole('Customer')) {
+            return false; // Customers cannot view ticket notes
+        }
+        return $user->can('View ticket note');
+    }
+
+    public function createTicketNote(User $user, Ticket $ticket)
+    {
+        if ($user->hasRole('Customer')) {
+            return false; // Customers cannot create ticket notes
+        }
+        return $user->can('Create ticket note');
+    }
+
+    public function updateTicketNote(User $user, Ticket $ticket, $ticketNote)
+    {
+        if ($user->hasRole('Customer')) {
+            return false;
+        }
+        return $user->can('Update ticket note') && $ticketNote->user_id === $user->id;
+    }
+
+    public function deleteTicketNote(User $user, Ticket $ticket, $ticketNote)
+    {
+        if ($user->hasRole('Customer')) {
+            return false;
+        }
+        return $user->can('Delete ticket note') && $ticketNote->user_id === $user->id;
+    }
+
+    // TicketComment Policies
+    public function viewTicketComment(User $user, Ticket $ticket)
+    {
+        return $user->can('View ticket comment');
+    }
+
+    public function createTicketComment(User $user, Ticket $ticket)
+    {
+        if ($user->hasRole('Developer')) {
+            return false; // Developers cannot create comments
+        }
+        return $user->can('Create ticket comment');
+    }
+
+    public function updateTicketComment(User $user, Ticket $ticket, $ticketComment)
+    {
+        return false; // No one can update comments
+    }
+
+    public function deleteTicketComment(User $user, Ticket $ticket, $ticketComment)
+    {
+        return false; // No one can delete comments
     }
 }

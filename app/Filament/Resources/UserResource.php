@@ -61,6 +61,12 @@ class UserResource extends Resource
                                     )
                                     ->maxLength(255),
 
+                                Forms\Components\CheckboxList::make('clients')
+                                    ->label(__('Clients'))
+                                    ->required()
+                                    ->columns(3)
+                                    ->relationship('clients', 'name'),
+
                                 Forms\Components\CheckboxList::make('roles')
                                     ->label(__('Permission roles'))
                                     ->required()
@@ -84,6 +90,10 @@ class UserResource extends Resource
                     ->label(__('Email address'))
                     ->sortable()
                     ->searchable(),
+
+                Tables\Columns\TagsColumn::make('clients.abbreviation')
+                    ->label(__('Clients'))
+                    ->limit(5),
 
                 Tables\Columns\TagsColumn::make('roles.name')
                     ->label(__('Roles'))

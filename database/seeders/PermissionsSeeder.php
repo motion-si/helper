@@ -21,9 +21,10 @@ class PermissionsSeeder extends Seeder
     }
 
     private array $modules = [
-        'permission', 'project', 'project status', 'role', 'ticket',
-        'ticket priority', 'ticket status', 'ticket type', 'user',
-        'activity', 'sprint'
+        'permission', 'project', 'project status', 'role',
+        'ticket', 'ticket comment', 'ticket note', 'ticket priority',
+        'ticket status', 'ticket type', 'user', 'activity',
+        'sprint'
     ];
 
     private array $pluralActions = [
@@ -39,7 +40,9 @@ class PermissionsSeeder extends Seeder
         'List timesheet data', 'View timesheet dashboard'
     ];
 
-    private string $defaultRole = 'Default role';
+    private string $projectManagerRole = 'Project Manager';
+    private string $developerRole = 'Developer';
+    private string $customerRole = 'Customer';
 
     /**
      * Run the database seeds.
@@ -70,20 +73,69 @@ class PermissionsSeeder extends Seeder
             ]);
         }
 
-        // Create default role
-        $role = Role::firstOrCreate([
-            'name' => $this->defaultRole
+        // Create projectManager role
+        $projectManagerRole = Role::firstOrCreate([
+            'name' => $this->projectManagerRole
         ]);
-        $settings = app(GeneralSettings::class);
-        $settings->default_role = $role->id;
-        $settings->save();
 
-        // Add all permissions to default role
-        $role->syncPermissions(Permission::all()->pluck('name')->toArray());
+        // Create developer role
+        $developerRole = Role::firstOrCreate([
+            'name' => $this->developerRole
+        ]);
 
-        // Assign default role to first database user
-        if ($user = User::first()) {
-            $user->syncRoles([$this->defaultRole]);
+        // Create customer role
+        $customerRole = Role::firstOrCreate([
+            'name' => $this->customerRole
+        ]);
+
+        // Assign permissions to roles
+        // Project Manager: All permissions
+        $projectManagerRole->syncPermissions(Permission::all()->pluck('name')->toArray());
+
+        // Developer Role Permissions
+        $developerPermissions = [
+            'List projects', 'View project',
+            'List tickets', 'View ticket', 'Create ticket', 'Update ticket',
+            'List ticket notes', 'View ticket note', 'Create ticket note', 'Update ticket note', 'Delete ticket note', // Notes: Full access for now, policy will restrict edit/delete to own
+            'List ticket comments', 'View ticket comment', // Comments: View only
+            'List ticket priorities', 'View ticket priority',
+            'List ticket statuses', 'View ticket status',
+            'List ticket types', 'View ticket type',
+            'List sprints', 'View sprint', 'Create sprint', 'Update sprint', 'Delete sprint',
+            'List activities', 'View activity',
+            'List timesheet data', 'View timesheet dashboard'
+            // Cannot manage users, roles, permissions, project statuses, general settings, import from Jira
+        ];
+        $developerRole->syncPermissions($developerPermissions);
+
+        // Customer Role Permissions
+        $customerPermissions = [
+            'List projects', 'View project', // Customers can see projects they are part of
+            'List tickets', 'View ticket', 'Create ticket', 'Update ticket', // Policy will restrict to their own tickets
+            'List ticket comments', 'View ticket comment', 'Create ticket comment', // Comments: Create and View
+            // Cannot see notes, priorities, statuses, types, sprints, activities, timesheet, users, roles, etc.
+        ];
+        $customerRole->syncPermissions($customerPermissions);
+
+
+        // Assign projectManager role to test database user
+        if ($user = User::where('email', 'test_project_manager@test.com')->first()) {
+            $user->syncRoles([$this->projectManagerRole]);
         }
+
+        // Assign developer role to test database user
+        if ($user = User::where('email', 'test_developer@test.com')->first()) {
+            $user->syncRoles([$this->developerRole]);
+        }
+
+        // Assign customer role to test database user
+        if ($user = User::where('email', 'test_customer@test.com')->first()) {
+            $user->syncRoles([$this->customerRole]);
+        }
+
+        // Set customer as default role
+        $settings = app(GeneralSettings::class);
+        $settings->default_role = $customerRole->id;
+        $settings->save();
     }
 }

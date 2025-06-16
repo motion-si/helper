@@ -149,6 +149,11 @@ class Ticket extends Model implements HasMedia
         return $this->belongsTo(Sprint::class, 'sprint_id', 'id');
     }
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id', 'id');
+    }
+
     public function watchers(): Attribute
     {
         return new Attribute(
