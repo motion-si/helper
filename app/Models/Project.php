@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Sprint;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -60,10 +61,6 @@ class Project extends Model implements HasMedia
         return $this->hasMany(Epic::class, 'project_id', 'id');
     }
 
-    public function sprints(): HasMany
-    {
-        return $this->hasMany(Sprint::class, 'project_id', 'id');
-    }
 
     public function epicsFirstDate(): Attribute
     {
@@ -114,10 +111,15 @@ class Project extends Model implements HasMedia
     public function currentSprint(): Attribute
     {
         return new Attribute(
-            get: fn() => $this->sprints()
-                ->whereNotNull('started_at')
-                ->whereNull('ended_at')
-                ->first()
+            get: function () {
+                return Sprint::whereHas('tickets', function ($query) {
+                        $query->where('project_id', $this->id);
+                    })
+                    ->whereNotNull('started_at')
+                    ->whereNull('ended_at')
+                    ->orderBy('starts_at')
+                    ->first();
+            }
         );
     }
 
@@ -125,15 +127,19 @@ class Project extends Model implements HasMedia
     {
         return new Attribute(
             get: function () {
-                if ($this->currentSprint) {
-                    return $this->sprints()
-                        ->whereNull('started_at')
-                        ->whereNull('ended_at')
-                        ->where('starts_at', '>=', $this->currentSprint->ends_at)
-                        ->orderBy('starts_at')
-                        ->first();
+                $current = $this->currentSprint;
+
+                $query = Sprint::whereHas('tickets', function ($query) {
+                        $query->where('project_id', $this->id);
+                    })
+                    ->whereNull('started_at')
+                    ->whereNull('ended_at');
+
+                if ($current) {
+                    $query->where('starts_at', '>=', $current->ends_at);
                 }
-                return null;
+
+                return $query->orderBy('starts_at')->first();
             }
         );
     }

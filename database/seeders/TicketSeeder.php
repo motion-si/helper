@@ -29,6 +29,7 @@ class TicketSeeder extends Seeder
             'priority_id' => 2,
             'estimation' => '04:30:00',
             'credits' => 1,
+            'client_id' => 2,
         ],
         [
             'name' => 'Ticket Example #2',
@@ -41,9 +42,9 @@ class TicketSeeder extends Seeder
             'type_id' => 2,
             'order' => 1,
             'priority_id' => 2,
-            'estimation' => '04:30:00',
-            'credits' => 1,
-            'sprint_id' => 1,
+            'estimation' => '08:00:00',
+            'credits' => 2,
+            'client_id' => 2,
         ],
         [
             'name' => 'Ticket Example #3',
@@ -58,6 +59,7 @@ class TicketSeeder extends Seeder
             'priority_id' => 2,
             'estimation' => '04:30:00',
             'credits' => 1,
+            'client_id' => 1,
         ],
     ];
 

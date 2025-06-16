@@ -59,7 +59,11 @@ class IssueForm extends Component implements HasForms
             $this->project = null;
         }
         $this->epics = $this->project ? $this->project->epics->pluck('name', 'id')->toArray() : [];
-        $this->sprints = $this->project ? $this->project->sprints->pluck('name', 'id')->toArray() : [];
+        $this->sprints = $this->project
+            ? \App\Models\Sprint::where('client_id', $this->project->client_id)
+                ->pluck('name', 'id')
+                ->toArray()
+            : [];
     }
 
     protected function getFormSchema(): array

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\ActiveSprints;
 use App\Filament\Widgets\FavoriteProjects;
 use App\Filament\Widgets\LatestActivities;
 use App\Filament\Widgets\LatestComments;
@@ -26,6 +27,7 @@ class Dashboard extends BasePage
     protected function getWidgets(): array
     {
         return [
+            ActiveSprints::class,
             FavoriteProjects::class,
             LatestActivities::class,
             LatestComments::class,
