@@ -70,7 +70,7 @@ class SprintResource extends Resource
                                     ->label(__('Tickets Credits'))
                                     ->numeric()
                                     ->disabled()
-                                    ->dehydrate(false),
+                                    ->dehydrated(false),
                                 Forms\Components\TextInput::make('extra_credits')
                                     ->label(__('Extra Credits'))
                                     ->numeric()
@@ -79,7 +79,7 @@ class SprintResource extends Resource
                                     ->label(__('Total Credits'))
                                     ->numeric()
                                     ->disabled()
-                                    ->dehydrate(false),
+                                    ->dehydrated(false),
                                 Forms\Components\Toggle::make('billed')
                                     ->label(__('Billed')),
                             ])->columns(2)
