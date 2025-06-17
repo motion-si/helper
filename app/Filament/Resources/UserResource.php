@@ -67,11 +67,12 @@ class UserResource extends Resource
                                     ->columns(3)
                                     ->relationship('clients', 'name'),
 
-                                Forms\Components\CheckboxList::make('roles')
-                                    ->label(__('Permission roles'))
+                                Forms\Components\Select::make('role_id')
+                                    ->label(__('Permission role'))
+                                    ->searchable()
                                     ->required()
-                                    ->columns(3)
-                                    ->relationship('roles', 'name'),
+                                    ->options(\App\Models\Role::all()->pluck('name', 'id')->toArray())
+                                    ->default(fn($record) => $record?->roles->first()?->id),
                             ]),
                     ])
             ]);
@@ -95,9 +96,8 @@ class UserResource extends Resource
                     ->label(__('Clients'))
                     ->limit(5),
 
-                Tables\Columns\TagsColumn::make('roles.name')
-                    ->label(__('Roles'))
-                    ->limit(2),
+                Tables\Columns\TextColumn::make('roles.first.name')
+                    ->label(__('Role')),
 
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label(__('Email verified at'))

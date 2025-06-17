@@ -136,6 +136,12 @@ class TicketResource extends Resource
                                             ->options(fn() => User::role(['Developer', 'Project Manager'])->pluck('name', 'id')->toArray()),
                                     ]),
 
+                                Forms\Components\Toggle::make('send_email')
+                                    ->label(__('Send email'))
+                                    ->default(true)
+                                    ->columnSpan(2)
+                                    ->visible(fn($livewire) => $livewire instanceof CreateRecord),
+
                                 Forms\Components\Grid::make()
                                     ->columns(3)
                                     ->columnSpan(2)

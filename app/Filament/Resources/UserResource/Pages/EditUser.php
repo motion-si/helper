@@ -17,4 +17,11 @@ class EditUser extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $this->record->syncRoles([$data['role_id']]);
+        unset($data['role_id']);
+        return $data;
+    }
 }

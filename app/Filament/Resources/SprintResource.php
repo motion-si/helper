@@ -164,9 +164,6 @@ class SprintResource extends Resource
                     ->icon('heroicon-o-play')
                     ->action(function (Sprint $record) {
                         $now = now();
-                        Sprint::whereNotNull('started_at')
-                            ->whereNull('ended_at')
-                            ->update(['ended_at' => $now]);
                         $record->started_at = $now;
                         $record->save();
                         Filament::notify('success', __('Sprint started at').' '.$now);
