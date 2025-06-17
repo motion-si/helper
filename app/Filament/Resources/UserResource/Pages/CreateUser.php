@@ -10,8 +10,18 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $roleId = $data['role_id'];
+        unset($data['role_id']);
+        $this->roleId = $roleId;
+
+        return $data;
+    }
+
     protected function afterCreate(): void
     {
-        $this->record->syncRoles([$this->data['role_id']]);
+        $this->record->syncRoles([$this->roleId]);
+        $this->record->refresh();
     }
 }

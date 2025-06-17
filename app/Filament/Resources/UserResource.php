@@ -96,8 +96,9 @@ class UserResource extends Resource
                     ->label(__('Clients'))
                     ->limit(5),
 
-                Tables\Columns\TextColumn::make('roles.first.name')
-                    ->label(__('Role')),
+                Tables\Columns\TextColumn::make('role')
+                    ->label(__('Role'))
+                    ->getStateUsing(fn($record) => $record->roles->first()->name ?? ''),
 
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label(__('Email verified at'))

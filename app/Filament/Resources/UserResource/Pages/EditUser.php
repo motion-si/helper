@@ -20,8 +20,14 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->record->syncRoles([$data['role_id']]);
+        $this->roleId = $data['role_id'];
         unset($data['role_id']);
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        $this->record->syncRoles([$this->roleId]);
+        $this->record->refresh();
     }
 }
