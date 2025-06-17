@@ -79,7 +79,7 @@ class IssueForm extends Component implements HasForms
                                 ->reactive()
                                 ->disabled($this->project != null)
                                 ->columnSpan(2)
-                                ->options(fn() => Project::where('owner_id', auth()->user()->id)
+                                ->options(fn() => Project::accessibleBy(auth()->user())
                                     ->pluck('name', 'id')->toArray()
                                 )
                                 ->afterStateUpdated(fn(Closure $get) => $this->initProject($get('project_id')))

@@ -34,9 +34,8 @@ class LatestProjects extends BaseWidget
 
     protected function getTableQuery(): Builder
     {
-        return Project::query()
+        return Project::accessibleBy(auth()->user())
             ->limit(5)
-            ->where('owner_id', auth()->user()->id)
             ->latest();
     }
 

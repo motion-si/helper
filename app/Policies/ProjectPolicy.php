@@ -31,7 +31,10 @@ class ProjectPolicy
     public function view(User $user, Project $project)
     {
         return $user->can('View project')
-            && $project->owner_id === $user->id;
+            && (
+                $project->owner_id === $user->id
+                || $user->belongsToClient($project->client_id)
+            );
     }
 
     /**
@@ -42,7 +45,7 @@ class ProjectPolicy
      */
     public function create(User $user)
     {
-        return $user->can('Create project');
+        return $user->hasRole('Project Manager') && $user->can('Create project');
     }
 
     /**
@@ -54,8 +57,12 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project)
     {
-        return $user->can('Update project')
-            && $project->owner_id === $user->id;
+        return $user->hasRole('Project Manager')
+            && $user->can('Update project')
+            && (
+                $project->owner_id === $user->id
+                || $user->belongsToClient($project->client_id)
+            );
     }
 
     /**
@@ -67,6 +74,11 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project)
     {
-        return $user->can('Delete project');
+        return $user->hasRole('Project Manager')
+            && $user->can('Delete project')
+            && (
+                $project->owner_id === $user->id
+                || $user->belongsToClient($project->client_id)
+            );
     }
 }

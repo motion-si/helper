@@ -20,7 +20,7 @@ class DataController extends Controller
      */
     public function data(Project $project): JsonResponse
     {
-        $project = Project::where('owner_id', auth()->user()->id)
+        $project = Project::accessibleBy(auth()->user())
             ->where('id', $project->id)
             ->first();
         if (!$project) {

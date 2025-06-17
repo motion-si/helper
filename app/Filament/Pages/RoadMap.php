@@ -123,6 +123,6 @@ class RoadMap extends Page implements HasForms
 
     private function projectQuery(): Builder
     {
-        return Project::where('owner_id', auth()->user()->id);
+        return Project::accessibleBy(auth()->user());
     }
 }

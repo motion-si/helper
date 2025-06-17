@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Sprint;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\User;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -54,6 +55,13 @@ class Project extends Model implements HasMedia
     public function epics(): HasMany
     {
         return $this->hasMany(Epic::class, 'project_id', 'id');
+    }
+
+    public function scopeAccessibleBy($query, User $user)
+    {
+        $clientIds = $user->clients()->pluck('clients.id');
+        return $query->where('owner_id', $user->id)
+            ->orWhereIn('client_id', $clientIds);
     }
 
 

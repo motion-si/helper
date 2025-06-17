@@ -113,6 +113,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return $this->belongsToMany(Client::class, 'user_clients', 'user_id', 'client_id');
     }
 
+    public function belongsToClient(int $clientId): bool
+    {
+        return $this->clients()->where('clients.id', $clientId)->exists();
+    }
+
     public function totalLoggedInHours(): Attribute
     {
         return new Attribute(

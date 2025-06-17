@@ -21,6 +21,6 @@ class ListProjects extends ListRecords
     protected function getTableQuery(): Builder
     {
         return parent::getTableQuery()
-            ->where('owner_id', auth()->user()->id);
+            ->accessibleBy(auth()->user());
     }
 }
