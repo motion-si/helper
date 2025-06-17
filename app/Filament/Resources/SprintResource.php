@@ -38,6 +38,11 @@ class SprintResource extends Resource
         return __('Management');
     }
 
+    protected static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('List sprints') ?? false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
