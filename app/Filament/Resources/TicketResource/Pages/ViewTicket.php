@@ -98,10 +98,7 @@ class ViewTicket extends ViewRecord implements HasForms
                 ->modalHeading(__('Log worked time'))
                 ->modalSubheading(__('Use the following form to add your worked time in this ticket.'))
                 ->modalButton(__('Log'))
-                ->visible(fn() => !auth()->user()->hasRole('Customer') && in_array(
-                    auth()->user()->id,
-                    [$this->record->owner_id, $this->record->responsible_id, $this->record->developer_id]
-                ))
+                ->visible(fn() => !auth()->user()->hasRole('Customer'))
                 ->form([
                     TimePicker::make('time')
                         ->label(__('Time to log'))

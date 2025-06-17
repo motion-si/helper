@@ -113,7 +113,8 @@ class PermissionsSeeder extends Seeder
             'List projects', 'View project', // Customers can see projects they are part of
             'List tickets', 'View ticket', 'Create ticket', 'Update ticket', // Policy will restrict to their own tickets
             'List ticket comments', 'View ticket comment', 'Create ticket comment', // Comments: Create and View
-            // Cannot see notes, priorities, statuses, types, sprints, activities, timesheet, users, roles, etc.
+            'List sprints', 'View sprint',
+            // Cannot see notes, priorities, statuses, types, activities, timesheet, users, roles, etc.
         ];
         $customerRole->syncPermissions($customerPermissions);
 
