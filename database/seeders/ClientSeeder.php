@@ -17,15 +17,15 @@ class ClientSeeder extends Seeder
 
     private array $data = [
         [
-            'name' => 'Internal Company',
-            'abbreviation' => 'INT'
+            'name' => 'Client Internal #1',
+            'abbreviation' => 'I#1'
         ],
         [
-            'name' => 'Client Example #1',
+            'name' => 'Client External #1',
             'abbreviation' => 'C#1'
         ],
         [
-            'name' => 'Client Example #2',
+            'name' => 'Client External #2',
             'abbreviation' => 'C#2'
         ],
     ];

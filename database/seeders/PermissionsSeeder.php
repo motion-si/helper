@@ -120,17 +120,17 @@ class PermissionsSeeder extends Seeder
 
 
         // Assign projectManager role to test database user
-        if ($user = User::where('email', 'test_project_manager@test.com')->first()) {
+        if ($user = User::where('email', 'project_manager@test.com')->first()) {
             $user->syncRoles([$this->projectManagerRole]);
         }
 
         // Assign developer role to test database user
-        if ($user = User::where('email', 'test_developer@test.com')->first()) {
+        if ($user = User::where('email', 'developer@test.com')->first()) {
             $user->syncRoles([$this->developerRole]);
         }
 
         // Assign customer role to test database user
-        if ($user = User::where('email', 'test_customer@test.com')->first()) {
+        if ($user = User::where('email', 'customer@test.com')->first()) {
             $user->syncRoles([$this->customerRole]);
         }
 

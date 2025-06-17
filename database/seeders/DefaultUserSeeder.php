@@ -24,10 +24,10 @@ class DefaultUserSeeder extends Seeder
      */
     public function run()
     {
-        if (User::where('email', 'test_project_manager@test.com')->count() == 0) {
+        if (User::where('email', 'project_manager@test.com')->count() == 0) {
             $user = User::create([
-                'name' => 'Test Project Manager',
-                'email' => 'test_project_manager@test.com',
+                'name' => 'Project Manager',
+                'email' => 'project_manager@test.com',
                 'password' => bcrypt('Passw@rd'),
                 'email_verified_at' => now()
             ]);
@@ -41,8 +41,8 @@ class DefaultUserSeeder extends Seeder
             ]);
 
             $user = User::create([
-                'name' => 'Test Developer',
-                'email' => 'test_developer@test.com',
+                'name' => 'Developer',
+                'email' => 'developer@test.com',
                 'password' => bcrypt('Passw@rd'),
                 'email_verified_at' => now()
             ]);
@@ -56,8 +56,8 @@ class DefaultUserSeeder extends Seeder
             ]);
 
             $user = User::create([
-                'name' => 'Test Customer',
-                'email' => 'test_customer@test.com',
+                'name' => 'Customer',
+                'email' => 'customer@test.com',
                 'password' => bcrypt('Passw@rd'),
                 'email_verified_at' => now()
             ]);

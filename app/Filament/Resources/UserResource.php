@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
+use App\Models\Role;
 use Filament\Forms;
 use Filament\Resources\Form;
 use Filament\Resources\Pages\CreateRecord;
@@ -71,8 +72,8 @@ class UserResource extends Resource
                                     ->label(__('Permission role'))
                                     ->searchable()
                                     ->required()
-                                    ->options(\App\Models\Role::all()->pluck('name', 'id')->toArray())
-                                    ->default(fn($record) => $record?->roles->first()?->id),
+                                    ->options(fn() => Role::all()->pluck('name', 'id')->toArray())
+                                    ->default(fn() => Role::where('name', 'Customer')->first()?->id),
                             ]),
                     ])
             ]);
