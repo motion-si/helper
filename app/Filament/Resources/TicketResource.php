@@ -262,14 +262,7 @@ class TicketResource extends Resource
 
     public static function tableColumns(bool $withProject = true): array
     {
-        $columns = [];
-        if ($withProject) {
-            $columns[] = Tables\Columns\TextColumn::make('project.name')
-                ->label(__('Project'))
-                ->sortable()
-                ->searchable();
-        }
-        $columns = array_merge($columns, [
+        $columns = [
             Tables\Columns\TextColumn::make('code')
                 ->label(__('Ticket code'))
                 ->sortable()
@@ -279,7 +272,16 @@ class TicketResource extends Resource
                 ->label(__('Ticket name'))
                 ->sortable()
                 ->searchable(),
+        ];
 
+        if ($withProject) {
+            $columns[] = Tables\Columns\TextColumn::make('project.name')
+                ->label(__('Project'))
+                ->sortable()
+                ->searchable();
+        }
+
+        $columns = array_merge($columns, [
             Tables\Columns\TextColumn::make('client.abbreviation')
                 ->label(__('Client'))
                 ->sortable()
@@ -308,8 +310,7 @@ class TicketResource extends Resource
                 ->label(__('Status'))
                 ->formatStateUsing(fn($record) => new HtmlString('
                             <div class="flex items-center gap-2 mt-1">
-                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md"
-                                    style="background-color: ' . $record->status->color . '"></span>
+                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md" style="background-color: ' . $record->status->color . '"></span>
                                 <span>' . $record->status->name . '</span>
                             </div>
                         '))
@@ -328,8 +329,7 @@ class TicketResource extends Resource
                 ->label(__('Priority'))
                 ->formatStateUsing(fn($record) => new HtmlString('
                             <div class="flex items-center gap-2 mt-1">
-                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md"
-                                    style="background-color: ' . $record->priority->color . '"></span>
+                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md" style="background-color: ' . $record->priority->color . '"></span>
                                 <span>' . $record->priority->name . '</span>
                             </div>
                         '))
