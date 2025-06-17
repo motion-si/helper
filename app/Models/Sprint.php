@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sprint extends Model
@@ -47,6 +48,12 @@ class Sprint extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id', 'id');
+    }
+
+    public function scopeAccessibleBy($query, User $user)
+    {
+        $clientIds = $user->clients()->pluck('clients.id');
+        return $query->whereIn('client_id', $clientIds);
     }
 
     public function tickets(): HasMany

@@ -28,6 +28,11 @@ class TimesheetExport extends Page implements HasForms
         return __('Timesheet');
     }
 
+    protected static function shouldRegisterNavigation(): bool
+    {
+        return !auth()->user()->hasRole('Customer');
+    }
+
     public function mount(): void
     {
         $this->form->fill();

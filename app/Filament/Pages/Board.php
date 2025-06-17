@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Project;
+use App\Models\Sprint;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -25,7 +25,7 @@ class Board extends Page implements HasForms
 
     protected function getSubheading(): string|Htmlable|null
     {
-        return __("In this section you can choose one of your projects to show it's Scrum or Kanban board");
+        return __("In this section you can choose one of your sprints to show its board");
     }
 
     public function mount(): void
@@ -51,14 +51,14 @@ class Board extends Page implements HasForms
                     Grid::make()
                         ->columns(1)
                         ->schema([
-                            Select::make('project')
-                                ->label(__('Project'))
+                            Select::make('sprint')
+                                ->label(__('Sprint'))
                                 ->required()
                                 ->searchable()
                                 ->reactive()
                                 ->afterStateUpdated(fn () => $this->search())
-                                ->helperText(__("Choose a project to show it's board"))
-                                ->options(fn() => Project::accessibleBy(auth()->user())
+                                ->helperText(__("Choose a sprint to show its board"))
+                                ->options(fn() => Sprint::accessibleBy(auth()->user())
                                     ->pluck('name', 'id')->toArray()),
                         ]),
                 ]),
@@ -68,11 +68,7 @@ class Board extends Page implements HasForms
     public function search(): void
     {
         $data = $this->form->getState();
-        $project = Project::find($data['project']);
-        if ($project->type === "scrum") {
-            $this->redirect(route('filament.pages.scrum/{project}', ['project' => $project]));
-        } else {
-            $this->redirect(route('filament.pages.kanban/{project}', ['project' => $project]));
-        }
+        $sprint = Sprint::find($data['sprint']);
+        $this->redirect(route('filament.pages.sprint-board/{sprint}', ['sprint' => $sprint]));
     }
 }

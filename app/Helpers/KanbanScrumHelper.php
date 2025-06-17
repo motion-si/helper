@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use App\Models\TicketPriority;
 use App\Models\TicketStatus;
 use App\Models\TicketType;
+use App\Models\Sprint;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
@@ -23,6 +24,7 @@ trait KanbanScrumHelper
     public bool $sortable = true;
 
     public Project|null $project = null;
+    public \App\Models\Sprint|null $sprint = null;
 
     public $users = [];
     public $types = [];
@@ -81,7 +83,14 @@ trait KanbanScrumHelper
     public function getStatuses(): Collection
     {
         $query = TicketStatus::query();
-        if ($this->project && $this->project->status_type === 'custom') {
+        if ($this->sprint && $this->sprint->epic?->project) {
+            $project = $this->sprint->epic->project;
+            if ($project->status_type === 'custom') {
+                $query->where('project_id', $project->id);
+            } else {
+                $query->whereNull('project_id');
+            }
+        } elseif ($this->project && $this->project->status_type === 'custom') {
             $query->where('project_id', $this->project->id);
         } else {
             $query->whereNull('project_id');
@@ -92,6 +101,11 @@ trait KanbanScrumHelper
                 $query = Ticket::query();
                 if ($this->project) {
                     $query->where('project_id', $this->project->id);
+                }
+                if ($this->sprint) {
+                    $query->where('sprint_id', $this->sprint->id);
+                } elseif ($this->project && $this->project->type === 'scrum') {
+                    $query->where('sprint_id', $this->project->currentSprint->id);
                 }
                 $query->where('status_id', $item->id);
                 return [
@@ -107,11 +121,15 @@ trait KanbanScrumHelper
     public function getRecords(): Collection
     {
         $query = Ticket::query();
-        if ($this->project->type === 'scrum') {
+        if ($this->sprint) {
+            $query->where('sprint_id', $this->sprint->id);
+        } elseif ($this->project && $this->project->type === 'scrum') {
             $query->where('sprint_id', $this->project->currentSprint->id);
         }
         $query->with(['project', 'owner', 'responsible', 'status', 'type', 'priority', 'epic']);
-        $query->where('project_id', $this->project->id);
+        if ($this->project) {
+            $query->where('project_id', $this->project->id);
+        }
         if (sizeof($this->users)) {
             $query->where(function ($query) {
                 return $query->whereIn('owner_id', $this->users)
@@ -156,6 +174,9 @@ trait KanbanScrumHelper
 
     public function recordUpdated(int $record, int $newIndex, int $newStatus): void
     {
+        if (auth()->user()->hasRole('Customer')) {
+            return;
+        }
         $ticket = Ticket::find($record);
         if ($ticket) {
             $ticket->order = $newIndex;
@@ -203,7 +224,9 @@ trait KanbanScrumHelper
         $heading .= '</a>';
         $heading .= '<div class="flex flex-col gap-1">';
         $heading .= '<span>' . __('Kanban');
-        if ($this->project) {
+        if ($this->sprint) {
+            $heading .= ' - ' . $this->sprint->name . '</span>';
+        } elseif ($this->project) {
             $heading .= ' - ' . $this->project->name . '</span>';
         } else {
             $heading .= '</span><span class="text-xs text-gray-400">'
@@ -224,7 +247,9 @@ trait KanbanScrumHelper
         $heading .= '</a>';
         $heading .= '<div class="flex flex-col gap-1">';
         $heading .= '<span>' . __('Scrum');
-        if ($this->project) {
+        if ($this->sprint) {
+            $heading .= ' - ' . $this->sprint->name . '</span>';
+        } elseif ($this->project) {
             $heading .= ' - ' . $this->project->name . '</span>';
         } else {
             $heading .= '</span><span class="text-xs text-gray-400">'
@@ -238,7 +263,21 @@ trait KanbanScrumHelper
 
     protected function scrumSubHeading(): string|Htmlable|null
     {
-        if ($this->project?->currentSprint) {
+        if ($this->sprint) {
+            return new HtmlString(
+                '<div class="w-full flex flex-col gap-1">'
+                . '<div class="w-full flex items-center gap-2">'
+                . '<span class="bg-danger-500 px-2 py-1 rounded text-white text-sm">'
+                . $this->sprint->name
+                . '</span>'
+                . '<span class="text-xs text-gray-400">'
+                . __('Starts at:') . ' ' . $this->sprint->starts_at->format(__('Y-m-d')) . ' - '
+                . __('Ends at:') . ' ' . $this->sprint->ends_at->format(__('Y-m-d'))
+                . '</span>'
+                . '</div>'
+                . '</div>'
+            );
+        } elseif ($this->project?->currentSprint) {
             return new HtmlString(
                 '<div class="w-full flex flex-col gap-1">'
                 . '<div class="w-full flex items-center gap-2">'

@@ -77,9 +77,8 @@ class TicketResource extends Resource
                                             );
                                         }
                                     })
-                                    ->options(fn() => Project::where('owner_id', auth()->user()->id)
-                                        ->pluck('name', 'id')->toArray()
-                                    )
+                                    ->options(fn() => Project::accessibleBy(auth()->user())
+                                        ->pluck('name', 'id')->toArray())
                                     ->default(fn() => request()->get('project'))
                                     ->required(),
                                 Forms\Components\Select::make('epic_id')
@@ -348,7 +347,7 @@ class TicketResource extends Resource
                 Tables\Filters\SelectFilter::make('project_id')
                     ->label(__('Project'))
                     ->multiple()
-                    ->options(fn() => Project::where('owner_id', auth()->user()->id)
+                    ->options(fn() => Project::accessibleBy(auth()->user())
                         ->pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('code')
