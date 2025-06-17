@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Project;
 use App\Models\ProjectStatus;
-use App\Models\ProjectUser;
 use App\Models\Ticket;
 use App\Models\TicketPriority;
 use App\Models\TicketStatus;
