@@ -183,6 +183,11 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function submitComment(): void
     {
+        $user = auth()->user();
+        if (! $user || ! $user->can('Create ticket comment', $this->record)) {
+            abort(403);
+        }
+
         $data = $this->form->getState();
         if ($this->selectedCommentId) {
             TicketComment::where('id', $this->selectedCommentId)
