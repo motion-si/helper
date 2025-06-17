@@ -3,7 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Helpers\KanbanScrumHelper;
-use App\Models\Project;
+use App\Models\Sprint;
 use Filament\Facades\Filament;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -11,13 +11,11 @@ use Filament\Pages\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 
-class Kanban extends Page implements HasForms
+class SprintBoard extends Page implements HasForms
 {
     use InteractsWithForms, KanbanScrumHelper;
 
-    protected static ?string $navigationIcon = 'heroicon-o-view-boards';
-
-    protected static ?string $slug = 'kanban/{project}';
+    protected static ?string $slug = 'sprint-board/{sprint}';
 
     protected static string $view = 'filament.pages.kanban';
 
@@ -25,15 +23,13 @@ class Kanban extends Page implements HasForms
 
     protected $listeners = [
         'recordUpdated',
-        'closeTicketDialog'
+        'closeTicketDialog',
     ];
 
-    public function mount(Project $project)
+    public function mount(Sprint $sprint): void
     {
-        $this->project = $project;
-        if ($this->project->type === 'scrum') {
-            $this->redirect(route('filament.pages.scrum/{project}', ['project' => $project]));
-        } elseif (!auth()->user()->can('view', $this->project)) {
+        $this->sprint = $sprint;
+        if (!auth()->user()->can('view', $sprint)) {
             abort(403);
         }
         $this->form->fill();
@@ -49,7 +45,7 @@ class Kanban extends Page implements HasForms
                 ->action(function () {
                     $this->getRecords();
                     Filament::notify('success', __('Kanban board updated'));
-                })
+                }),
         ];
     }
 
@@ -62,5 +58,4 @@ class Kanban extends Page implements HasForms
     {
         return $this->formSchema();
     }
-
 }

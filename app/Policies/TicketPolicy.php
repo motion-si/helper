@@ -31,21 +31,21 @@ class TicketPolicy
     public function view(User $user, Ticket $ticket)
     {
         if ($user->hasRole('Customer')) {
-            return $user->can('View ticket') && $ticket->owner_id === $user->id;
+            return $user->can('View ticket') && (
+                $ticket->owner_id === $user->id
+                || $user->belongsToClient($ticket->client_id)
+            );
         }
 
-        // Project Owners can view all tickets in their project
-        if ($ticket->project && $ticket->project->owner_id === $user->id) {
+        if ($ticket->project && ($ticket->project->owner_id === $user->id || $user->belongsToClient($ticket->project->client_id))) {
             return $user->can('View ticket');
         }
 
         return $user->can('View ticket')
             && (
                 $ticket->owner_id === $user->id
-                ||
-                $ticket->responsible_id === $user->id
-                ||
-                $ticket->project->users()->where('users.id', $user->id)->count()
+                || $ticket->responsible_id === $user->id
+                || $ticket->developer_id === $user->id
             );
     }
 
@@ -71,18 +71,18 @@ class TicketPolicy
     public function update(User $user, Ticket $ticket)
     {
         if ($user->hasRole('Customer')) {
-            return $user->can('Update ticket') && $ticket->owner_id === $user->id;
+            return false;
+        }
+
+        if ($ticket->project && ($ticket->project->owner_id === $user->id || $user->belongsToClient($ticket->project->client_id))) {
+            return $user->can('Update ticket');
         }
 
         return $user->can('Update ticket')
             && (
                 $ticket->owner_id === $user->id
-                ||
-                $ticket->responsible_id === $user->id
-                ||
-                $ticket->project->users()->where('users.id', $user->id)->count()
-                ||
-                ($ticket->project && $ticket->project->owner_id === $user->id) // Project owner can update
+                || $ticket->responsible_id === $user->id
+                || $ticket->developer_id === $user->id
             );
     }
 

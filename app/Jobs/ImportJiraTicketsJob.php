@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Project;
 use App\Models\ProjectStatus;
-use App\Models\ProjectUser;
 use App\Models\Ticket;
 use App\Models\TicketPriority;
 use App\Models\TicketStatus;
@@ -57,11 +56,6 @@ class ImportJiraTicketsJob implements ShouldQueue
                         'ticket_prefix' => $projectDetails->key
                     ]);
 
-                    ProjectUser::create([
-                        'project_id' => $project->id,
-                        'user_id' => $this->user->id,
-                        'role' => config('system.projects.affectations.roles.can_manage')
-                    ]);
                 }
 
                 Ticket::create([

@@ -17,18 +17,18 @@ class ProjectSeeder extends Seeder
 
     private array $data = [
         [
-            'name' => 'Example #1',
-            'description' => '<p>Test example #1</p>',
-            'owner_id' => 3,
+            'name' => 'Project Example #1 Client Internal #1',
+            'description' => '<p>Project Test example #1</p>',
+            'owner_id' => 1,
             'status_id' => 3,
             'ticket_prefix' => '001',
             'status_type' => 'default',
             'type' => 'scrum',
-            'client_id' => 2,
+            'client_id' => 1,
         ],
         [
-            'name' => 'Example #2',
-            'description' => '<p>Test example #2</p>',
+            'name' => 'Project Example #2 Client External #1',
+            'description' => '<p>Project Test example #2</p>',
             'owner_id' => 3,
             'status_id' => 3,
             'ticket_prefix' => '002',
@@ -37,14 +37,24 @@ class ProjectSeeder extends Seeder
             'client_id' => 2,
         ],
         [
-            'name' => 'Example #3',
-            'description' => '<p>Test example #3</p>',
+            'name' => 'Project Example #3 Client External #1',
+            'description' => '<p>Project Test example #3</p>',
             'owner_id' => 1,
             'status_id' => 3,
             'ticket_prefix' => '003',
             'status_type' => 'default',
             'type' => 'scrum',
-            'client_id' => 1,
+            'client_id' => 2,
+        ],
+        [
+            'name' => 'Project Example #4 Client External #2',
+            'description' => '<p>Project Test example #4</p>',
+            'owner_id' => 1,
+            'status_id' => 3,
+            'ticket_prefix' => '004',
+            'status_type' => 'default',
+            'type' => 'scrum',
+            'client_id' => 3,
         ],
     ];
 

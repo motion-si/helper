@@ -1,7 +1,9 @@
 <div class="kanban-record" data-id="{{ $record['id'] }}">
-    <button type="button" class="handle">
-        <x-heroicon-o-arrows-expand class="w-5 h-5" />
-    </button>
+    @unless(auth()->user()->hasRole('Customer'))
+        <button type="button" class="handle">
+            <x-heroicon-o-arrows-expand class="w-5 h-5" />
+        </button>
+    @endunless
     <div class="record-info">
         @if($this->isMultiProject())
             <span class="record-subtitle">

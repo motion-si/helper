@@ -10,6 +10,13 @@ class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['role_id'] = $this->record->roles->first()->id ?? null;
+
+        return $data;
+    }
+
     protected function getActions(): array
     {
         return [

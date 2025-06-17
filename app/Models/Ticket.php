@@ -20,10 +20,12 @@ class Ticket extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia;
 
+    public bool $sendEmail = true;
+
     protected $fillable = [
-        'name', 'content', 'owner_id', 'responsible_id',
+        'name', 'content', 'owner_id', 'responsible_id', 'developer_id',
         'status_id', 'project_id', 'code', 'order', 'type_id',
-        'priority_id', 'estimation', 'epic_id', 'sprint_id'
+        'priority_id', 'estimation', 'epic_id', 'sprint_id', 'client_id'
     ];
 
     public static function boot()
@@ -42,8 +44,9 @@ class Ticket extends Model implements HasMedia
             if ($item->sprint_id && $item->sprint->epic_id) {
                 Ticket::where('id', $item->id)->update(['epic_id' => $item->sprint->epic_id]);
             }
+            $sendEmail = $item->sendEmail ?? request()->boolean('data.send_email', true);
             foreach ($item->watchers as $user) {
-                $user->notify(new TicketCreated($item));
+                $user->notify(new TicketCreated($item, $sendEmail));
             }
         });
 
@@ -82,6 +85,11 @@ class Ticket extends Model implements HasMedia
     public function responsible(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_id', 'id');
+    }
+
+    public function developer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'developer_id', 'id');
     }
 
     public function status(): BelongsTo
@@ -158,10 +166,13 @@ class Ticket extends Model implements HasMedia
     {
         return new Attribute(
             get: function () {
-                $users = $this->project->users;
+                $users = collect();
                 $users->push($this->owner);
                 if ($this->responsible) {
                     $users->push($this->responsible);
+                }
+                if ($this->developer) {
+                    $users->push($this->developer);
                 }
                 return $users->unique('id');
             }

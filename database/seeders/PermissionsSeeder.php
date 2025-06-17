@@ -113,23 +113,24 @@ class PermissionsSeeder extends Seeder
             'List projects', 'View project', // Customers can see projects they are part of
             'List tickets', 'View ticket', 'Create ticket', 'Update ticket', // Policy will restrict to their own tickets
             'List ticket comments', 'View ticket comment', 'Create ticket comment', // Comments: Create and View
-            // Cannot see notes, priorities, statuses, types, sprints, activities, timesheet, users, roles, etc.
+            'List sprints', 'View sprint',
+            // Cannot see notes, priorities, statuses, types, activities, timesheet, users, roles, etc.
         ];
         $customerRole->syncPermissions($customerPermissions);
 
 
         // Assign projectManager role to test database user
-        if ($user = User::where('email', 'test_project_manager@test.com')->first()) {
+        if ($user = User::where('email', 'project_manager@test.com')->first()) {
             $user->syncRoles([$this->projectManagerRole]);
         }
 
         // Assign developer role to test database user
-        if ($user = User::where('email', 'test_developer@test.com')->first()) {
+        if ($user = User::where('email', 'developer@test.com')->first()) {
             $user->syncRoles([$this->developerRole]);
         }
 
         // Assign customer role to test database user
-        if ($user = User::where('email', 'test_customer@test.com')->first()) {
+        if ($user = User::where('email', 'customer@test.com')->first()) {
             $user->syncRoles([$this->customerRole]);
         }
 

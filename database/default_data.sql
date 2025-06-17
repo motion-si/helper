@@ -7,7 +7,6 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (6, '2022_11_02_113007_create_permission_tables', 1),
 (7, '2022_11_02_124027_create_project_statuses_table', 1),
 (8, '2022_11_02_124028_create_projects_table', 1),
-(9, '2022_11_02_131753_create_project_users_table', 1),
 (10, '2022_11_02_134510_create_media_table', 1),
 (11, '2022_11_02_152359_create_project_favorites_table', 1),
 (12, '2022_11_02_193241_create_ticket_statuses_table', 1),

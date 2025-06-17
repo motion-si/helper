@@ -39,16 +39,16 @@ class LatestComments extends BaseWidget
 
     protected function getTableQuery(): Builder
     {
+        $clientIds = auth()->user()->clients()->pluck('clients.id');
         return TicketComment::query()
             ->limit(5)
-            ->whereHas('ticket', function ($query) {
+            ->whereHas('ticket', function ($query) use ($clientIds) {
                 return $query->where('owner_id', auth()->user()->id)
                     ->orWhere('responsible_id', auth()->user()->id)
-                    ->orWhereHas('project', function ($query) {
+                    ->orWhere('developer_id', auth()->user()->id)
+                    ->orWhereHas('project', function ($query) use ($clientIds) {
                         return $query->where('owner_id', auth()->user()->id)
-                            ->orWhereHas('users', function ($query) {
-                                return $query->where('users.id', auth()->user()->id);
-                            });
+                            ->orWhereIn('client_id', $clientIds);
                     });
             })
             ->latest();

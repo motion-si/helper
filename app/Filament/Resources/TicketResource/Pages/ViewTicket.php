@@ -98,10 +98,7 @@ class ViewTicket extends ViewRecord implements HasForms
                 ->modalHeading(__('Log worked time'))
                 ->modalSubheading(__('Use the following form to add your worked time in this ticket.'))
                 ->modalButton(__('Log'))
-                ->visible(fn() => in_array(
-                    auth()->user()->id,
-                    [$this->record->owner_id, $this->record->responsible_id]
-                ))
+                ->visible(fn() => !auth()->user()->hasRole('Customer'))
                 ->form([
                     TimePicker::make('time')
                         ->label(__('Time to log'))
@@ -186,6 +183,11 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function submitComment(): void
     {
+        $user = auth()->user();
+        if (! $user || ! $user->can('Create ticket comment', $this->record)) {
+            abort(403);
+        }
+
         $data = $this->form->getState();
         if ($this->selectedCommentId) {
             TicketComment::where('id', $this->selectedCommentId)
@@ -244,12 +246,7 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function isAdministrator(): bool
     {
-        return $this->record
-                ->project
-                ->users()
-                ->where('users.id', auth()->user()->id)
-                ->where('role', 'administrator')
-                ->count() != 0;
+        return $this->record->project->owner_id === auth()->id();
     }
 
     public function editComment(int $commentId): void

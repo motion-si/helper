@@ -77,11 +77,8 @@ class TicketResource extends Resource
                                             );
                                         }
                                     })
-                                    ->options(fn() => Project::where('owner_id', auth()->user()->id)
-                                        ->orWhereHas('users', function ($query) {
-                                            return $query->where('users.id', auth()->user()->id);
-                                        })->pluck('name', 'id')->toArray()
-                                    )
+                                    ->options(fn() => Project::accessibleBy(auth()->user())
+                                        ->pluck('name', 'id')->toArray())
                                     ->default(fn() => request()->get('project'))
                                     ->required(),
                                 Forms\Components\Select::make('epic_id')
@@ -132,7 +129,18 @@ class TicketResource extends Resource
                                             ->label(__('Ticket responsible'))
                                             ->searchable()
                                             ->options(fn() => User::all()->pluck('name', 'id')->toArray()),
+
+                                        Forms\Components\Select::make('developer_id')
+                                            ->label(__('Developer'))
+                                            ->searchable()
+                                            ->options(fn() => User::role(['Developer', 'Project Manager'])->pluck('name', 'id')->toArray()),
                                     ]),
+
+                                Forms\Components\Toggle::make('send_email')
+                                    ->label(__('Send email'))
+                                    ->default(true)
+                                    ->columnSpan(2)
+                                    ->visible(fn($livewire) => $livewire instanceof CreateRecord),
 
                                 Forms\Components\Grid::make()
                                     ->columns(3)
@@ -254,14 +262,7 @@ class TicketResource extends Resource
 
     public static function tableColumns(bool $withProject = true): array
     {
-        $columns = [];
-        if ($withProject) {
-            $columns[] = Tables\Columns\TextColumn::make('project.name')
-                ->label(__('Project'))
-                ->sortable()
-                ->searchable();
-        }
-        $columns = array_merge($columns, [
+        $columns = [
             Tables\Columns\TextColumn::make('code')
                 ->label(__('Ticket code'))
                 ->sortable()
@@ -271,7 +272,16 @@ class TicketResource extends Resource
                 ->label(__('Ticket name'))
                 ->sortable()
                 ->searchable(),
+        ];
 
+        if ($withProject) {
+            $columns[] = Tables\Columns\TextColumn::make('project.name')
+                ->label(__('Project'))
+                ->sortable()
+                ->searchable();
+        }
+
+        $columns = array_merge($columns, [
             Tables\Columns\TextColumn::make('client.abbreviation')
                 ->label(__('Client'))
                 ->sortable()
@@ -290,12 +300,17 @@ class TicketResource extends Resource
                 ->formatStateUsing(fn($record) => view('components.user-avatar', ['user' => $record->responsible]))
                 ->searchable(),
 
+            Tables\Columns\TextColumn::make('developer.name')
+                ->label(__('Developer'))
+                ->sortable()
+                ->formatStateUsing(fn($record) => view('components.user-avatar', ['user' => $record->developer]))
+                ->searchable(),
+
             Tables\Columns\TextColumn::make('status.name')
                 ->label(__('Status'))
                 ->formatStateUsing(fn($record) => new HtmlString('
                             <div class="flex items-center gap-2 mt-1">
-                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md"
-                                    style="background-color: ' . $record->status->color . '"></span>
+                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md" style="background-color: ' . $record->status->color . '"></span>
                                 <span>' . $record->status->name . '</span>
                             </div>
                         '))
@@ -314,8 +329,7 @@ class TicketResource extends Resource
                 ->label(__('Priority'))
                 ->formatStateUsing(fn($record) => new HtmlString('
                             <div class="flex items-center gap-2 mt-1">
-                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md"
-                                    style="background-color: ' . $record->priority->color . '"></span>
+                                <span class="filament-tables-color-column relative flex h-6 w-6 rounded-md" style="background-color: ' . $record->priority->color . '"></span>
                                 <span>' . $record->priority->name . '</span>
                             </div>
                         '))
@@ -339,10 +353,8 @@ class TicketResource extends Resource
                 Tables\Filters\SelectFilter::make('project_id')
                     ->label(__('Project'))
                     ->multiple()
-                    ->options(fn() => Project::where('owner_id', auth()->user()->id)
-                        ->orWhereHas('users', function ($query) {
-                            return $query->where('users.id', auth()->user()->id);
-                        })->pluck('name', 'id')->toArray()),
+                    ->options(fn() => Project::accessibleBy(auth()->user())
+                        ->pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('code')
                     ->label(__('Ticket code'))
@@ -368,6 +380,11 @@ class TicketResource extends Resource
                     ->label(__('Responsible'))
                     ->multiple()
                     ->options(fn() => User::all()->pluck('name', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('developer_id')
+                    ->label(__('Developer'))
+                    ->multiple()
+                    ->options(fn() => User::role(['Developer', 'Project Manager'])->pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('status_id')
                     ->label(__('Status'))

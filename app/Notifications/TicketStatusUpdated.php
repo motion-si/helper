@@ -18,6 +18,7 @@ class TicketStatusUpdated extends Notification implements ShouldQueue
 
     private Ticket $ticket;
     private TicketActivity $activity;
+    private bool $sendEmail;
 
     /**
      * Create a new notification instance.
@@ -25,10 +26,11 @@ class TicketStatusUpdated extends Notification implements ShouldQueue
      * @param Ticket $ticket
      * @return void
      */
-    public function __construct(Ticket $ticket)
+    public function __construct(Ticket $ticket, bool $sendEmail = true)
     {
         $this->ticket = $ticket;
         $this->activity = $this->ticket->activities->last();
+        $this->sendEmail = $sendEmail;
     }
 
     /**
@@ -39,7 +41,7 @@ class TicketStatusUpdated extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        return $this->sendEmail ? ['mail', 'database'] : ['database'];
     }
 
     /**

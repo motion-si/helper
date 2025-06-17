@@ -106,6 +106,7 @@
                 </div>
             @endif
 
+            @unless(auth()->user()->hasRole('Customer'))
             <div class="w-full flex flex-col gap-1 pt-3">
                 <span class="text-gray-500 text-sm font-medium">
                     {{ __('Estimation') }}
@@ -154,6 +155,7 @@
                     -
                 @endif
             </div>
+            @endunless
 
             <div class="w-full flex flex-col gap-1 pt-3">
                 <span class="text-gray-500 text-sm font-medium">
@@ -240,11 +242,13 @@
                         @if($tab === 'activities') border-primary-500 text-primary-500 @else text-gray-700 @endif">
                     {{ __('Activities') }}
                 </button>
+                @unless(auth()->user()->hasRole('Customer'))
                 <button wire:click="selectTab('time')"
                         class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500
                         @if($tab === 'time') border-primary-500 text-primary-500 @else text-gray-700 @endif">
                     {{ __('Time logged') }}
                 </button>
+                @endunless
                 <button wire:click="selectTab('attachments')"
                         class="md:text-xl text-sm p-3 border-b-2 border-transparent hover:border-primary-500
                         @if($tab === 'attachments') border-primary-500 text-primary-500 @else text-gray-700 @endif">
@@ -252,19 +256,21 @@
                 </button>
             </div>
             @if($tab === 'comments')
-                <form wire:submit.prevent="submitComment" class="pb-5">
-                    {{ $this->form }}
-                    <button type="submit"
-                            class="px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded mt-3">
-                        {{ __($selectedCommentId ? 'Edit comment' : 'Add comment') }}
-                    </button>
-                    @if($selectedCommentId)
-                        <button type="button" wire:click="cancelEditComment"
-                                class="px-3 py-2 bg-warning-500 hover:bg-warning-600 text-white rounded mt-3">
-                            {{ __('Cancel') }}
+                @unless(auth()->user()->hasRole('Developer'))
+                    <form wire:submit.prevent="submitComment" class="pb-5">
+                        {{ $this->form }}
+                        <button type="submit"
+                                class="px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded mt-3">
+                            {{ __($selectedCommentId ? 'Edit comment' : 'Add comment') }}
                         </button>
-                    @endif
-                </form>
+                        @if($selectedCommentId)
+                            <button type="button" wire:click="cancelEditComment"
+                                    class="px-3 py-2 bg-warning-500 hover:bg-warning-600 text-white rounded mt-3">
+                                {{ __('Cancel') }}
+                            </button>
+                        @endif
+                    </form>
+                @endunless
                 @foreach($record->comments->sortByDesc('created_at') as $comment)
                     <div
                         class="w-full flex flex-col gap-2 @if(!$loop->last) pb-5 mb-5 border-b border-gray-200 @endif ticket-comment">
@@ -376,7 +382,7 @@
                     @endif
                 </div>
             @endif
-            @if($tab === 'time')
+            @if(!auth()->user()->hasRole('Customer') && $tab === 'time')
                 <livewire:timesheet.time-logged :ticket="$record" />
             @endif
             @if($tab === 'attachments')
