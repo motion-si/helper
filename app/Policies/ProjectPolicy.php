@@ -31,11 +31,7 @@ class ProjectPolicy
     public function view(User $user, Project $project)
     {
         return $user->can('View project')
-            && (
-                $project->owner_id === $user->id
-                ||
-                $project->users()->where('users.id', $user->id)->count()
-            );
+            && $project->owner_id === $user->id;
     }
 
     /**
@@ -59,13 +55,7 @@ class ProjectPolicy
     public function update(User $user, Project $project)
     {
         return $user->can('Update project')
-            && (
-                $project->owner_id === $user->id
-                ||
-                $project->users()->where('users.id', $user->id)
-                    ->where('role', config('system.projects.affectations.roles.can_manage'))
-                    ->count()
-            );
+            && $project->owner_id === $user->id;
     }
 
     /**

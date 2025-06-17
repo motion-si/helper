@@ -80,9 +80,7 @@ class IssueForm extends Component implements HasForms
                                 ->disabled($this->project != null)
                                 ->columnSpan(2)
                                 ->options(fn() => Project::where('owner_id', auth()->user()->id)
-                                    ->orWhereHas('users', function ($query) {
-                                        return $query->where('users.id', auth()->user()->id);
-                                    })->pluck('name', 'id')->toArray()
+                                    ->pluck('name', 'id')->toArray()
                                 )
                                 ->afterStateUpdated(fn(Closure $get) => $this->initProject($get('project_id')))
                                 ->required(),

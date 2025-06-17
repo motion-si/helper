@@ -57,11 +57,6 @@ class ImportJiraTicketsJob implements ShouldQueue
                         'ticket_prefix' => $projectDetails->key
                     ]);
 
-                    ProjectUser::create([
-                        'project_id' => $project->id,
-                        'user_id' => $this->user->id,
-                        'role' => config('system.projects.affectations.roles.can_manage')
-                    ]);
                 }
 
                 Ticket::create([

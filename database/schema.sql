@@ -277,20 +277,6 @@ CREATE TABLE `project_statuses` (
 
 -- --------------------------------------------------------
 
---
--- Structure de la table `project_users`
---
-
-CREATE TABLE `project_users` (
-                                 `id` bigint(20) UNSIGNED NOT NULL,
-                                 `user_id` bigint(20) UNSIGNED NOT NULL,
-                                 `project_id` bigint(20) UNSIGNED NOT NULL,
-                                 `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                                 `created_at` timestamp NULL DEFAULT NULL,
-                                 `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 --
 -- Structure de la table `roles`
@@ -676,16 +662,6 @@ ALTER TABLE `project_statuses`
     ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `project_users`
---
-ALTER TABLE `project_users`
-    ADD PRIMARY KEY (`id`),
-    ADD KEY `project_users_user_id_foreign` (`user_id`),
-    ADD KEY `project_users_project_id_foreign` (`project_id`);
-
---
--- Index pour la table `roles`
---
 ALTER TABLE `roles`
     ADD PRIMARY KEY (`id`),
     ADD UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`);
@@ -885,12 +861,6 @@ ALTER TABLE `project_statuses`
     MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `project_users`
---
-ALTER TABLE `project_users`
-    MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT pour la table `roles`
 --
 ALTER TABLE `roles`
@@ -1017,12 +987,6 @@ ALTER TABLE `project_favorites`
     ADD CONSTRAINT `project_favorites_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
     ADD CONSTRAINT `project_favorites_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
---
--- Contraintes pour la table `project_users`
---
-ALTER TABLE `project_users`
-    ADD CONSTRAINT `project_users_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
-    ADD CONSTRAINT `project_users_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Contraintes pour la table `role_has_permissions`

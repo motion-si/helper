@@ -42,10 +42,9 @@ class TicketPolicy
         return $user->can('View ticket')
             && (
                 $ticket->owner_id === $user->id
-                ||
-                $ticket->responsible_id === $user->id
-                ||
-                $ticket->project->users()->where('users.id', $user->id)->count()
+                || $ticket->responsible_id === $user->id
+                || $ticket->developer_id === $user->id
+                || ($ticket->project && $ticket->project->owner_id === $user->id)
             );
     }
 
@@ -77,12 +76,9 @@ class TicketPolicy
         return $user->can('Update ticket')
             && (
                 $ticket->owner_id === $user->id
-                ||
-                $ticket->responsible_id === $user->id
-                ||
-                $ticket->project->users()->where('users.id', $user->id)->count()
-                ||
-                ($ticket->project && $ticket->project->owner_id === $user->id) // Project owner can update
+                || $ticket->responsible_id === $user->id
+                || $ticket->developer_id === $user->id
+                || ($ticket->project && $ticket->project->owner_id === $user->id)
             );
     }
 

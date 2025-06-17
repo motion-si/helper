@@ -21,7 +21,7 @@ class Ticket extends Model implements HasMedia
     use HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
-        'name', 'content', 'owner_id', 'responsible_id',
+        'name', 'content', 'owner_id', 'responsible_id', 'developer_id',
         'status_id', 'project_id', 'code', 'order', 'type_id',
         'priority_id', 'estimation', 'epic_id', 'sprint_id'
     ];
@@ -82,6 +82,11 @@ class Ticket extends Model implements HasMedia
     public function responsible(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_id', 'id');
+    }
+
+    public function developer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'developer_id', 'id');
     }
 
     public function status(): BelongsTo
@@ -158,10 +163,13 @@ class Ticket extends Model implements HasMedia
     {
         return new Attribute(
             get: function () {
-                $users = $this->project->users;
+                $users = collect();
                 $users->push($this->owner);
                 if ($this->responsible) {
                     $users->push($this->responsible);
+                }
+                if ($this->developer) {
+                    $users->push($this->developer);
                 }
                 return $users->unique('id');
             }

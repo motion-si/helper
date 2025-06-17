@@ -244,12 +244,7 @@ class ViewTicket extends ViewRecord implements HasForms
 
     public function isAdministrator(): bool
     {
-        return $this->record
-                ->project
-                ->users()
-                ->where('users.id', auth()->user()->id)
-                ->where('role', 'administrator')
-                ->count() != 0;
+        return $this->record->project->owner_id === auth()->id();
     }
 
     public function editComment(int $commentId): void

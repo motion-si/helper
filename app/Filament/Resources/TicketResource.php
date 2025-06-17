@@ -78,9 +78,7 @@ class TicketResource extends Resource
                                         }
                                     })
                                     ->options(fn() => Project::where('owner_id', auth()->user()->id)
-                                        ->orWhereHas('users', function ($query) {
-                                            return $query->where('users.id', auth()->user()->id);
-                                        })->pluck('name', 'id')->toArray()
+                                        ->pluck('name', 'id')->toArray()
                                     )
                                     ->default(fn() => request()->get('project'))
                                     ->required(),
@@ -132,6 +130,11 @@ class TicketResource extends Resource
                                             ->label(__('Ticket responsible'))
                                             ->searchable()
                                             ->options(fn() => User::all()->pluck('name', 'id')->toArray()),
+
+                                        Forms\Components\Select::make('developer_id')
+                                            ->label(__('Developer'))
+                                            ->searchable()
+                                            ->options(fn() => User::role(['Developer', 'Project Manager'])->pluck('name', 'id')->toArray()),
                                     ]),
 
                                 Forms\Components\Grid::make()
@@ -290,6 +293,12 @@ class TicketResource extends Resource
                 ->formatStateUsing(fn($record) => view('components.user-avatar', ['user' => $record->responsible]))
                 ->searchable(),
 
+            Tables\Columns\TextColumn::make('developer.name')
+                ->label(__('Developer'))
+                ->sortable()
+                ->formatStateUsing(fn($record) => view('components.user-avatar', ['user' => $record->developer]))
+                ->searchable(),
+
             Tables\Columns\TextColumn::make('status.name')
                 ->label(__('Status'))
                 ->formatStateUsing(fn($record) => new HtmlString('
@@ -340,9 +349,7 @@ class TicketResource extends Resource
                     ->label(__('Project'))
                     ->multiple()
                     ->options(fn() => Project::where('owner_id', auth()->user()->id)
-                        ->orWhereHas('users', function ($query) {
-                            return $query->where('users.id', auth()->user()->id);
-                        })->pluck('name', 'id')->toArray()),
+                        ->pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('code')
                     ->label(__('Ticket code'))
@@ -368,6 +375,11 @@ class TicketResource extends Resource
                     ->label(__('Responsible'))
                     ->multiple()
                     ->options(fn() => User::all()->pluck('name', 'id')->toArray()),
+
+                Tables\Filters\SelectFilter::make('developer_id')
+                    ->label(__('Developer'))
+                    ->multiple()
+                    ->options(fn() => User::role(['Developer', 'Project Manager'])->pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('status_id')
                     ->label(__('Status'))

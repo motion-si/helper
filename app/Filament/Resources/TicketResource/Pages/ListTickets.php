@@ -29,11 +29,9 @@ class ListTickets extends ListRecords
             ->where(function ($query) {
                 return $query->where('owner_id', auth()->user()->id)
                     ->orWhere('responsible_id', auth()->user()->id)
+                    ->orWhere('developer_id', auth()->user()->id)
                     ->orWhereHas('project', function ($query) {
-                        return $query->where('owner_id', auth()->user()->id)
-                            ->orWhereHas('users', function ($query) {
-                                return $query->where('users.id', auth()->user()->id);
-                            });
+                        return $query->where('owner_id', auth()->user()->id);
                     });
             });
     }
