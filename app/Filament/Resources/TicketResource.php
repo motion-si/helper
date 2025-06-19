@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers;
-use App\Models\Epic;
 use App\Models\Project;
 use App\Models\Ticket;
 use App\Models\TicketPriority;
@@ -81,13 +80,6 @@ class TicketResource extends Resource
                                         ->pluck('name', 'id')->toArray())
                                     ->default(fn() => request()->get('project'))
                                     ->required(),
-                                Forms\Components\Select::make('epic_id')
-                                    ->label(__('Epic'))
-                                    ->searchable()
-                                    ->reactive()
-                                    ->options(function ($get, $set) {
-                                        return Epic::where('project_id', $get('project_id'))->pluck('name', 'id')->toArray();
-                                    }),
                                 Forms\Components\Grid::make()
                                     ->columns(12)
                                     ->columnSpan(2)
@@ -215,6 +207,36 @@ class TicketResource extends Resource
                                     ->columnSpan(2),
                             ]),
 
+                        Forms\Components\Grid::make()
+                            ->columnSpan(2)
+                            ->columns(12)
+                            ->schema([
+                                Forms\Components\TextInput::make('branch')
+                                    ->label(__('Branch'))
+                                    ->columnSpan(3)
+                                    ->visible(fn() => auth()->user()->hasAnyRole(['Project Manager','Developer'])),
+                                Forms\Components\TextInput::make('development_environment')
+                                    ->label(__('Development Environment'))
+                                    ->columnSpan(3)
+                                    ->disabled(fn() => auth()->user()->hasRole('Customer')),
+                                Forms\Components\DatePicker::make('starts_at')
+                                    ->label(__('Starts At'))
+                                    ->columnSpan(3)
+                                    ->visible(fn() => auth()->user()->hasAnyRole(['Project Manager','Developer'])),
+                                Forms\Components\DatePicker::make('ends_at')
+                                    ->label(__('Ends At'))
+                                    ->columnSpan(3)
+                                    ->visible(fn() => auth()->user()->hasAnyRole(['Project Manager','Developer'])),
+                                Forms\Components\DatePicker::make('released_at')
+                                    ->label(__('Released At'))
+                                    ->columnSpan(3)
+                                    ->disabled(fn() => !auth()->user()->hasRole('Project Manager')),
+                                Forms\Components\Toggle::make('false_bug_report')
+                                    ->label(__('False Bug Report'))
+                                    ->columnSpan(2)
+                                    ->disabled(fn() => !auth()->user()->hasRole('Project Manager')),
+                            ]),
+
                         Forms\Components\Repeater::make('relations')
                             ->itemLabel(function (array $state) {
                                 $ticketRelation = TicketRelation::find($state['id'] ?? 0);
@@ -335,6 +357,38 @@ class TicketResource extends Resource
                         '))
                 ->sortable()
                 ->searchable(),
+
+            Tables\Columns\TextColumn::make('branch')
+                ->label(__('Branch'))
+                ->sortable()
+                ->searchable()
+                ->visible(fn () => auth()->user()->hasAnyRole(['Project Manager','Developer'])),
+
+            Tables\Columns\TextColumn::make('development_environment')
+                ->label(__('Development Environment'))
+                ->sortable()
+                ->searchable(),
+
+            Tables\Columns\TextColumn::make('starts_at')
+                ->label(__('Starts At'))
+                ->date()
+                ->sortable()
+                ->visible(fn () => auth()->user()->hasAnyRole(['Project Manager','Developer'])),
+
+            Tables\Columns\TextColumn::make('ends_at')
+                ->label(__('Ends At'))
+                ->date()
+                ->sortable()
+                ->visible(fn () => auth()->user()->hasAnyRole(['Project Manager','Developer'])),
+
+            Tables\Columns\TextColumn::make('released_at')
+                ->label(__('Released At'))
+                ->date()
+                ->sortable(),
+
+            Tables\Columns\IconColumn::make('false_bug_report')
+                ->label(__('False Bug Report'))
+                ->boolean(),
 
             Tables\Columns\TextColumn::make('created_at')
                 ->label(__('Created at'))

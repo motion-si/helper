@@ -25,6 +25,7 @@ class Sprint extends Model
         'extra_credits',
         'total_credits',
         'billed',
+        'billing_reference',
         'started_at',
         'ended_at',
     ];
@@ -35,6 +36,7 @@ class Sprint extends Model
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
         'billed' => 'boolean',
+        'billing_reference' => 'date',
     ];
 
     protected static function booted()
@@ -59,11 +61,6 @@ class Sprint extends Model
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'sprint_id', 'id');
-    }
-
-    public function epic(): BelongsTo
-    {
-        return $this->belongsTo(Epic::class, 'epic_id', 'id');
     }
 
     public function remaining(): Attribute

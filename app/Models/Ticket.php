@@ -25,7 +25,8 @@ class Ticket extends Model implements HasMedia
     protected $fillable = [
         'name', 'content', 'owner_id', 'responsible_id', 'developer_id',
         'status_id', 'project_id', 'code', 'order', 'type_id',
-        'priority_id', 'estimation', 'epic_id', 'sprint_id', 'client_id'
+        'priority_id', 'estimation', 'sprint_id', 'client_id',
+        'branch', 'development_environment', 'starts_at', 'ends_at', 'released_at', 'false_bug_report'
     ];
 
     public static function boot()
@@ -41,9 +42,6 @@ class Ticket extends Model implements HasMedia
         });
 
         static::created(function (Ticket $item) {
-            if ($item->sprint_id && $item->sprint->epic_id) {
-                Ticket::where('id', $item->id)->update(['epic_id' => $item->sprint->epic_id]);
-            }
             $sendEmail = $item->sendEmail ?? request()->boolean('data.send_email', true);
             foreach ($item->watchers as $user) {
                 $user->notify(new TicketCreated($item, $sendEmail));
@@ -67,13 +65,6 @@ class Ticket extends Model implements HasMedia
                 }
             }
 
-            // Ticket sprint update
-            $oldSprint = $old->sprint_id;
-            if ($oldSprint && !$item->sprint_id) {
-                Ticket::where('id', $item->id)->update(['epic_id' => null]);
-            } elseif ($item->sprint_id && $item->sprint->epic_id) {
-                Ticket::where('id', $item->id)->update(['epic_id' => $item->sprint->epic_id]);
-            }
         });
     }
 
@@ -140,11 +131,6 @@ class Ticket extends Model implements HasMedia
     public function hours(): HasMany
     {
         return $this->hasMany(TicketHour::class, 'ticket_id', 'id');
-    }
-
-    public function epic(): BelongsTo
-    {
-        return $this->belongsTo(Epic::class, 'epic_id', 'id');
     }
 
     public function sprint(): BelongsTo

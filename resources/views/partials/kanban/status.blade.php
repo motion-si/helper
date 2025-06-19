@@ -23,17 +23,7 @@
             </a>
 
             @if($ticket)
-                <!-- Epic modal -->
-                <div class="dialog-container">
-                    <div class="dialog dialog-xl">
-                        <div class="dialog-header">
-                            {{ __('Create ticket') }}
-                        </div>
-                        <div class="dialog-content">
-                            @livewire('road-map.issue-form', ['project' => null])
-                        </div>
-                    </div>
-                </div>
+                <!-- Ticket modal removed -->
             @endif
         @endif
     </div>

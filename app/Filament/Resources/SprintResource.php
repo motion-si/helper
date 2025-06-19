@@ -87,6 +87,9 @@ class SprintResource extends Resource
                                     ->dehydrated(false),
                                 Forms\Components\Toggle::make('billed')
                                     ->label(__('Billed')),
+                                Forms\Components\DatePicker::make('billing_reference')
+                                    ->label(__('Billing Reference'))
+                                    ->disabled(fn() => !auth()->user()->hasRole('Project Manager')),
                             ])->columns(2)
                     ])
             ]);
@@ -132,6 +135,10 @@ class SprintResource extends Resource
                     ->boolean()
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('billing_reference')
+                    ->label(__('Billing Reference'))
+                    ->date()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('started_at')
                     ->label(__('Sprint started at'))
                     ->dateTime()
@@ -162,7 +169,7 @@ class SprintResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('start')
                     ->label(__('Start sprint'))
-                    ->visible(fn($record) => !$record->started_at && !$record->ended_at)
+                    ->visible(fn($record) => auth()->user()->hasRole('Project Manager') && !$record->started_at && !$record->ended_at)
                     ->requiresConfirmation()
                     ->color('success')
                     ->button()
@@ -175,7 +182,7 @@ class SprintResource extends Resource
                     }),
                 Tables\Actions\Action::make('stop')
                     ->label(__('Stop sprint'))
-                    ->visible(fn($record) => $record->started_at && !$record->ended_at)
+                    ->visible(fn($record) => auth()->user()->hasRole('Project Manager') && $record->started_at && !$record->ended_at)
                     ->requiresConfirmation()
                     ->color('danger')
                     ->button()
@@ -190,6 +197,7 @@ class SprintResource extends Resource
                     ->label(__('Tickets'))
                     ->color('secondary')
                     ->icon('heroicon-o-ticket')
+                    ->visible(fn() => auth()->user()->hasRole('Project Manager'))
                     ->mountUsing(fn(Forms\ComponentContainer $form, Sprint $record) => $form->fill([
                         'tickets' => $record->tickets->pluck('id')->toArray()
                     ]))
@@ -223,6 +231,22 @@ class SprintResource extends Resource
                         $record->save();
                         Filament::notify('success', __('Tickets associated with sprint'));
                     }),
+
+                Tables\Actions\Action::make('view_tickets')
+                    ->label(__('Tickets'))
+                    ->color('secondary')
+                    ->icon('heroicon-o-ticket')
+                    ->visible(fn() => !auth()->user()->hasRole('Project Manager'))
+                    ->modalHeading(fn($record) => $record->name.' - '.__('Associated tickets'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel(__('Close'))
+                    ->form([
+                        Forms\Components\CheckboxList::make('tickets')
+                            ->label(__('Associated tickets'))
+                            ->options(fn(Sprint $record) => $record->tickets->pluck('name','id')->toArray())
+                            ->disabled()
+                            ->dehydrated(false)
+                    ]),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
