@@ -26,6 +26,8 @@ class Tickets extends Page implements HasForms, HasTable
 {
     use InteractsWithForms, InteractsWithTable;
 
+    public bool $hasSearched = false;
+
     protected static ?string $slug = 'reports/tickets';
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
@@ -45,6 +47,11 @@ class Tickets extends Page implements HasForms, HasTable
     public function mount(): void
     {
         $this->form->fill();
+    }
+
+    public function search(): void
+    {
+        $this->hasSearched = true;
     }
 
     protected function getFormSchema(): array
@@ -83,6 +90,10 @@ class Tickets extends Page implements HasForms, HasTable
 
     protected function getTableQuery(): Builder
     {
+        if (!$this->hasSearched) {
+            return Ticket::query()->whereRaw('1 = 0');
+        }
+
         $data = $this->form->getState();
 
         $query = Ticket::query()->with([
