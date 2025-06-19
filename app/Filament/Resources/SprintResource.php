@@ -237,6 +237,10 @@ class SprintResource extends Resource
                     ->color('secondary')
                     ->icon('heroicon-o-ticket')
                     ->visible(fn() => !auth()->user()->hasRole('Project Manager'))
+                    ->button()
+                    ->mountUsing(fn(Forms\ComponentContainer $form, Sprint $record) => $form->fill([
+                        'tickets' => $record->tickets->pluck('id')->toArray(),
+                    ]))
                     ->modalHeading(fn($record) => $record->name.' - '.__('Associated tickets'))
                     ->modalSubmitAction(null)
                     ->modalCancelAction(fn(\Filament\Support\Actions\Modal\Actions\Action $action) => $action->label(__('Close')))
