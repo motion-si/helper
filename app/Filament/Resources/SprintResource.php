@@ -13,6 +13,7 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Support\Actions\Modal\Actions\Action as ModalAction;
 
 class SprintResource extends Resource
 {
@@ -217,9 +218,9 @@ class SprintResource extends Resource
                             ->required()
                     ] : [])
                     ->modalSubmitAction(auth()->user()->hasRole('Project Manager')
-                        ? fn($action) => $action->label(__('Add to sprint'))
+                        ? fn(ModalAction $action) => $action->label(__('Add to sprint'))
                         : null)
-                    ->modalCancelAction(fn($action) => $action->label(__('Close')))
+                    ->modalCancelAction(fn(ModalAction $action) => $action->label(__('Close')))
                     ->action(function (Sprint $record, array $data) {
                         if (!isset($data['ticket_id'])) {
                             return;
