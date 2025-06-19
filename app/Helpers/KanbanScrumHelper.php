@@ -83,14 +83,7 @@ trait KanbanScrumHelper
     public function getStatuses(): Collection
     {
         $query = TicketStatus::query();
-        if ($this->sprint && $this->sprint->epic?->project) {
-            $project = $this->sprint->epic->project;
-            if ($project->status_type === 'custom') {
-                $query->where('project_id', $project->id);
-            } else {
-                $query->whereNull('project_id');
-            }
-        } elseif ($this->project && $this->project->status_type === 'custom') {
+        if ($this->project && $this->project->status_type === 'custom') {
             $query->where('project_id', $this->project->id);
         } else {
             $query->whereNull('project_id');
@@ -126,7 +119,7 @@ trait KanbanScrumHelper
         } elseif ($this->project && $this->project->type === 'scrum') {
             $query->where('sprint_id', $this->project->currentSprint->id);
         }
-        $query->with(['project', 'owner', 'responsible', 'status', 'type', 'priority', 'epic']);
+        $query->with(['project', 'owner', 'responsible', 'status', 'type', 'priority']);
         if ($this->project) {
             $query->where('project_id', $this->project->id);
         }
@@ -166,7 +159,6 @@ trait KanbanScrumHelper
                 'project' => $item->project,
                 'status' => $item->status->id,
                 'priority' => $item->priority,
-                'epic' => $item->epic,
                 'relations' => $item->relations,
                 'totalLoggedHours' => $item->totalLoggedSeconds ? $item->totalLoggedHours : null
             ]);

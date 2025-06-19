@@ -7,12 +7,29 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
-        Schema::table('sprints', function (Blueprint $table) {
-            if (Schema::hasColumn('sprints', 'project_id')) {
-                $table->dropForeign(['project_id']);
-                $table->dropColumn('project_id');
-            }
+        // 1. derruba constraints, dropa e recria
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('sprints');
+        Schema::enableForeignKeyConstraints();
+
+        // 2. recria a tabela sprints com novos campos
+        Schema::create('sprints', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->date('starts_at');
+            $table->date('ends_at');
+            $table->longText('description')->nullable();
+
+            // housekeeping
+            $table->softDeletes();
+            $table->timestamps();
+            $table->dateTime('started_at')->nullable();
+            $table->dateTime('ended_at')->nullable();
+
+            // relações
             $table->foreignId('client_id')->nullable()->constrained('clients');
+
+            // novos campos de créditos / billing
             $table->integer('tickets_credits')->nullable();
             $table->integer('extra_credits')->default(0);
             $table->integer('total_credits')->nullable();
@@ -22,8 +39,21 @@ return new class extends Migration {
 
     public function down()
     {
-        Schema::table('sprints', function (Blueprint $table) {
-            $table->dropColumn(['client_id','tickets_credits','extra_credits','total_credits','billed']);
+        // rollback recreando a versão *antiga* (com project_id)
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('sprints');
+        Schema::enableForeignKeyConstraints();
+
+        Schema::create('sprints', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->date('starts_at');
+            $table->date('ends_at');
+            $table->longText('description')->nullable();
+            $table->softDeletes();
+            $table->timestamps();
+
+            // campos antigos
             $table->foreignId('project_id')->constrained('projects');
         });
     }

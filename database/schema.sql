@@ -38,21 +38,6 @@ CREATE TABLE `activities` (
 
 -- --------------------------------------------------------
 
---
--- Structure de la table `epics`
---
-
-CREATE TABLE `epics` (
-                         `id` bigint(20) UNSIGNED NOT NULL,
-                         `project_id` bigint(20) UNSIGNED NOT NULL,
-                         `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-                         `starts_at` date NOT NULL,
-                         `ends_at` date NOT NULL,
-                         `created_at` timestamp NULL DEFAULT NULL,
-                         `updated_at` timestamp NULL DEFAULT NULL,
-                         `deleted_at` timestamp NULL DEFAULT NULL,
-                         `parent_id` bigint(20) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -354,7 +339,6 @@ CREATE TABLE `tickets` (
                            `order` int(11) NOT NULL DEFAULT 0,
                            `priority_id` bigint(20) UNSIGNED NOT NULL,
                            `estimation` double(8,2) DEFAULT NULL,
-                           `epic_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -552,13 +536,6 @@ CREATE TABLE `users` (
 ALTER TABLE `activities`
     ADD PRIMARY KEY (`id`);
 
---
--- Index pour la table `epics`
---
-ALTER TABLE `epics`
-    ADD PRIMARY KEY (`id`),
-    ADD KEY `epics_project_id_foreign` (`project_id`),
-    ADD KEY `epics_parent_id_foreign` (`parent_id`);
 
 --
 -- Index pour la table `failed_jobs`
@@ -698,7 +675,6 @@ ALTER TABLE `tickets`
     ADD KEY `tickets_project_id_foreign` (`project_id`),
     ADD KEY `tickets_type_id_foreign` (`type_id`),
     ADD KEY `tickets_priority_id_foreign` (`priority_id`),
-    ADD KEY `tickets_epic_id_foreign` (`epic_id`);
 
 --
 -- Index pour la table `ticket_activities`
@@ -795,10 +771,6 @@ ALTER TABLE `activities`
     MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `epics`
---
-ALTER TABLE `epics`
-    MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `failed_jobs`
@@ -955,11 +927,6 @@ ALTER TABLE `users`
 --
 
 --
--- Contraintes pour la table `epics`
---
-ALTER TABLE `epics`
-    ADD CONSTRAINT `epics_parent_id_foreign` FOREIGN KEY (`parent_id`) REFERENCES `epics` (`id`),
-    ADD CONSTRAINT `epics_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`);
 
 --
 -- Contraintes pour la table `model_has_permissions`
@@ -999,7 +966,6 @@ ALTER TABLE `role_has_permissions`
 -- Contraintes pour la table `tickets`
 --
 ALTER TABLE `tickets`
-    ADD CONSTRAINT `tickets_epic_id_foreign` FOREIGN KEY (`epic_id`) REFERENCES `epics` (`id`),
     ADD CONSTRAINT `tickets_owner_id_foreign` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`),
     ADD CONSTRAINT `tickets_priority_id_foreign` FOREIGN KEY (`priority_id`) REFERENCES `ticket_priorities` (`id`),
     ADD CONSTRAINT `tickets_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),

@@ -91,20 +91,63 @@
                         @endif
                     </div>
                 </div>
-            @else
+            @endif
+
+            @if(auth()->user()->hasAnyRole(['Project Manager','Developer']))
                 <div class="w-full flex flex-col gap-1 pt-3">
                     <span class="text-gray-500 text-sm font-medium">
-                        {{ __('Epic') }}
+                        {{ __('Branch') }}
                     </span>
-                    <div class="w-full flex items-center gap-1 text-gray-500">
-                        @if($record->epic)
-                            {{ $record->epic->name }}
-                        @else
-                            -
-                        @endif
+                    <div class="w-full text-gray-500">
+                        {{ $record->branch ?? '-' }}
                     </div>
                 </div>
             @endif
+
+            <div class="w-full flex flex-col gap-1 pt-3">
+                <span class="text-gray-500 text-sm font-medium">
+                    {{ __('Development Environment') }}
+                </span>
+                <div class="w-full text-gray-500">
+                    {{ $record->development_environment ?? '-' }}
+                </div>
+            </div>
+
+            @if(auth()->user()->hasAnyRole(['Project Manager','Developer']))
+                <div class="w-full flex flex-col gap-1 pt-3">
+                    <span class="text-gray-500 text-sm font-medium">
+                        {{ __('Starts At') }}
+                    </span>
+                    <div class="w-full text-gray-500">
+                        {{ $record->starts_at ? \Illuminate\Support\Carbon::parse($record->starts_at)->format(__('Y-m-d')) : '-' }}
+                    </div>
+                </div>
+                <div class="w-full flex flex-col gap-1 pt-3">
+                    <span class="text-gray-500 text-sm font-medium">
+                        {{ __('Ends At') }}
+                    </span>
+                    <div class="w-full text-gray-500">
+                        {{ $record->ends_at ? \Illuminate\Support\Carbon::parse($record->ends_at)->format(__('Y-m-d')) : '-' }}
+                    </div>
+                </div>
+                <div class="w-full flex flex-col gap-1 pt-3">
+                    <span class="text-gray-500 text-sm font-medium">
+                        {{ __('Released At') }}
+                    </span>
+                    <div class="w-full text-gray-500">
+                        {{ $record->released_at ? \Illuminate\Support\Carbon::parse($record->released_at)->format(__('Y-m-d')) : '-' }}
+                    </div>
+                </div>
+            @endif
+
+            <div class="w-full flex flex-col gap-1 pt-3">
+                <span class="text-gray-500 text-sm font-medium">
+                    {{ __('False Bug Report') }}
+                </span>
+                <div class="w-full text-gray-500">
+                    {{ $record->false_bug_report ? __('Yes') : __('No') }}
+                </div>
+            </div>
 
             @unless(auth()->user()->hasRole('Customer'))
             <div class="w-full flex flex-col gap-1 pt-3">

@@ -52,44 +52,15 @@ class Project extends Model implements HasMedia
         return $this->hasMany(TicketStatus::class, 'project_id', 'id');
     }
 
-    public function epics(): HasMany
-    {
-        return $this->hasMany(Epic::class, 'project_id', 'id');
-    }
 
     public function scopeAccessibleBy($query, User $user)
     {
-        $clientIds = $user->clients()->pluck('clients.id');
+        $clientIds = $user->clients()->pluck('clients.id')->toArray();
         return $query->where('owner_id', $user->id)
             ->orWhereIn('client_id', $clientIds);
     }
 
 
-    public function epicsFirstDate(): Attribute
-    {
-        return new Attribute(
-            get: function () {
-                $firstEpic = $this->epics()->orderBy('starts_at')->first();
-                if ($firstEpic) {
-                    return $firstEpic->starts_at;
-                }
-                return now();
-            }
-        );
-    }
-
-    public function epicsLastDate(): Attribute
-    {
-        return new Attribute(
-            get: function () {
-                $firstEpic = $this->epics()->orderBy('ends_at', 'desc')->first();
-                if ($firstEpic) {
-                    return $firstEpic->ends_at;
-                }
-                return now();
-            }
-        );
-    }
 
     public function contributors(): Attribute
     {

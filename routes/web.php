@@ -4,7 +4,6 @@ use App\Models\User;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Route;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use App\Http\Controllers\RoadMap\DataController;
 use App\Http\Controllers\Auth\OidcAuthController;
 
 // Share ticket
@@ -25,10 +24,6 @@ Route::get('/validate-account/{user:creation_token}', function (User $user) {
 // Login default redirection
 Route::redirect('/login-redirect', '/login')->name('login');
 
-// Road map JSON data
-Route::get('road-map/data/{project}', [DataController::class, 'data'])
-    ->middleware(['verified', 'auth'])
-    ->name('road-map.data');
 
 Route::name('oidc.')
     ->prefix('oidc')

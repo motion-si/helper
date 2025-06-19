@@ -33,7 +33,7 @@ class ActiveSprints extends BaseWidget
 
     protected function getTableQuery(): Builder
     {
-        return Sprint::query()
+        return Sprint::accessibleBy(auth()->user())
             ->whereDate('starts_at', '<=', now())
             ->whereDate('ends_at', '>=', now());
     }

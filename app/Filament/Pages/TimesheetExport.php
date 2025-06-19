@@ -25,7 +25,7 @@ class TimesheetExport extends Page implements HasForms
 
     protected static function getNavigationGroup(): ?string
     {
-        return __('Timesheet');
+        return __('Reports');
     }
 
     protected static function shouldRegisterNavigation(): bool
