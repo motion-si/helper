@@ -13,7 +13,6 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
-use Illuminate\Support\HtmlString;
 
 class SprintResource extends Resource
 {
@@ -197,60 +196,45 @@ class SprintResource extends Resource
                     ->label(__('Tickets'))
                     ->color('secondary')
                     ->icon('heroicon-o-ticket')
-                    ->visible(fn() => auth()->user()->hasRole('Project Manager'))
-                    ->mountUsing(fn(Forms\ComponentContainer $form, Sprint $record) => $form->fill([
-                        'tickets' => $record->tickets->pluck('id')->toArray()
-                    ]))
-                    ->modalHeading(fn($record) => $record->name.' - '.__('Associated tickets'))
-                    ->form([
-                        Forms\Components\CheckboxList::make('tickets')
-                            ->label(__('Choose tickets to associate to this sprint'))
-                            ->required()
+                    ->button()
+                    ->modalHeading(fn($record) => $record->name.' - '.__('Sprint tickets'))
+                    ->modalContent(fn($record) => view('filament.resources.sprints.tickets-modal', ['record' => $record]))
+                    ->form(fn() => auth()->user()->hasRole('Project Manager') ? [
+                        Forms\Components\Select::make('ticket_id')
+                            ->label(__('Ticket'))
+                            ->searchable()
                             ->options(function (Sprint $record) {
                                 $backlog = TicketStatus::where('name', 'Backlog')->first();
-                                $results = [];
-                                $tickets = Ticket::where('client_id', $record->client_id)
-                                    ->where(function ($query) use ($record, $backlog) {
-                                        $query->where('status_id', $backlog->id)
-                                            ->orWhere('sprint_id', $record->id);
-                                    })->get();
-                                foreach ($tickets as $ticket) {
-                                    $results[$ticket->id] = new HtmlString('<div class="w-full flex justify-between items-center">'
-                                        .'<span>'.$ticket->name.'</span>'
-                                        .($ticket->sprint ? '<span class="text-xs font-medium '.($ticket->sprint_id == $record->id ? 'bg-gray-100 text-gray-600' : 'bg-danger-500 text-white').' px-2 py-1 rounded">'.$ticket->sprint->name.'</span>' : '')
-                                        .'</div>');
-                                }
-                                return $results;
+                                return Ticket::where('client_id', $record->client_id)
+                                    ->where('status_id', $backlog->id)
+                                    ->whereNull('sprint_id')
+                                    ->get()
+                                    ->mapWithKeys(fn($t) => [
+                                        $t->id => $t->code.' | '.$t->name.' | '.$t->project->name,
+                                    ])
+                                    ->toArray();
                             })
-                    ])
-                    ->action(function (Sprint $record, array $data) {
-                        $tickets = $data['tickets'];
-                        Ticket::where('sprint_id', $record->id)->update(['sprint_id' => null]);
-                        $statusSprint = TicketStatus::where('name', 'Sprint')->first();
-                        Ticket::whereIn('id', $tickets)->update(['sprint_id' => $record->id, 'status_id' => $statusSprint->id]);
-                        $record->save();
-                        Filament::notify('success', __('Tickets associated with sprint'));
-                    }),
-
-                Tables\Actions\Action::make('view_tickets')
-                    ->label(__('Tickets'))
-                    ->color('secondary')
-                    ->icon('heroicon-o-ticket')
-                    ->visible(fn() => !auth()->user()->hasRole('Project Manager'))
-                    ->button()
-                    ->mountUsing(fn(Forms\ComponentContainer $form, Sprint $record) => $form->fill([
-                        'tickets' => $record->tickets->pluck('id')->toArray(),
-                    ]))
-                    ->modalHeading(fn($record) => $record->name.' - '.__('Associated tickets'))
-                    ->modalSubmitAction(null)
+                            ->required()
+                    ] : [])
+                    ->modalSubmitAction(auth()->user()->hasRole('Project Manager')
+                        ? fn(\Filament\Support\Actions\Modal\Actions\Action $action) => $action->label(__('Add to sprint'))
+                        : null)
                     ->modalCancelAction(fn(\Filament\Support\Actions\Modal\Actions\Action $action) => $action->label(__('Close')))
-                    ->form([
-                        Forms\Components\CheckboxList::make('tickets')
-                            ->label(__('Associated tickets'))
-                            ->options(fn(Sprint $record) => $record->tickets->pluck('name','id')->toArray())
-                            ->disabled()
-                            ->dehydrated(false)
-                    ]),
+                    ->action(function (Sprint $record, array $data) {
+                        if (!isset($data['ticket_id'])) {
+                            return;
+                        }
+                        $ticket = Ticket::find($data['ticket_id']);
+                        if (!$ticket) {
+                            return;
+                        }
+                        $statusSprint = TicketStatus::where('name', 'Sprint')->first();
+                        $ticket->status_id = $statusSprint->id;
+                        $ticket->sprint_id = $record->id;
+                        $ticket->save();
+                        $record->refresh();
+                        Filament::notify('success', __('Ticket added to sprint'));
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
