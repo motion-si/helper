@@ -239,7 +239,7 @@ class SprintResource extends Resource
                     ->visible(fn() => !auth()->user()->hasRole('Project Manager'))
                     ->modalHeading(fn($record) => $record->name.' - '.__('Associated tickets'))
                     ->modalSubmitAction(null)
-                    ->modalCancelActionLabel(__('Close'))
+                    ->modalCancelAction(fn(\Filament\Support\Actions\Modal\Actions\Action $action) => $action->label(__('Close')))
                     ->form([
                         Forms\Components\CheckboxList::make('tickets')
                             ->label(__('Associated tickets'))
