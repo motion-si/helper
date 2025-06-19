@@ -54,7 +54,7 @@ class Sprint extends Model
 
     public function scopeAccessibleBy($query, User $user)
     {
-        $clientIds = $user->clients()->pluck('clients.id');
+        $clientIds = $user->clients()->pluck('clients.id')->toArray();
         return $query->whereIn('client_id', $clientIds);
     }
 

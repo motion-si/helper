@@ -29,6 +29,13 @@ class Ticket extends Model implements HasMedia
         'branch', 'development_environment', 'starts_at', 'ends_at', 'released_at', 'false_bug_report'
     ];
 
+    protected $casts = [
+        'starts_at' => 'date',
+        'ends_at' => 'date',
+        'released_at' => 'date',
+        'false_bug_report' => 'boolean',
+    ];
+
     public static function boot()
     {
         parent::boot();

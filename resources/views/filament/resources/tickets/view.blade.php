@@ -119,7 +119,7 @@
                         {{ __('Starts At') }}
                     </span>
                     <div class="w-full text-gray-500">
-                        {{ $record->starts_at?->format(__('Y-m-d')) ?? '-' }}
+                        {{ $record->starts_at ? \Illuminate\Support\Carbon::parse($record->starts_at)->format(__('Y-m-d')) : '-' }}
                     </div>
                 </div>
                 <div class="w-full flex flex-col gap-1 pt-3">
@@ -127,7 +127,7 @@
                         {{ __('Ends At') }}
                     </span>
                     <div class="w-full text-gray-500">
-                        {{ $record->ends_at?->format(__('Y-m-d')) ?? '-' }}
+                        {{ $record->ends_at ? \Illuminate\Support\Carbon::parse($record->ends_at)->format(__('Y-m-d')) : '-' }}
                     </div>
                 </div>
                 <div class="w-full flex flex-col gap-1 pt-3">
@@ -135,7 +135,7 @@
                         {{ __('Released At') }}
                     </span>
                     <div class="w-full text-gray-500">
-                        {{ $record->released_at?->format(__('Y-m-d')) ?? '-' }}
+                        {{ $record->released_at ? \Illuminate\Support\Carbon::parse($record->released_at)->format(__('Y-m-d')) : '-' }}
                     </div>
                 </div>
             @endif

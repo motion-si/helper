@@ -61,7 +61,7 @@ class Tickets extends Page implements HasForms, HasTable
                 Grid::make()->columns(3)->schema([
                     Select::make('client_id')
                         ->label(__('Client'))
-                        ->options(fn () => Client::all()->pluck('name', 'id')->toArray())
+                        ->options(fn () => auth()->user()->clients()->pluck('clients.name', 'clients.id')->toArray())
                         ->searchable(),
                     Select::make('status_id')
                         ->label(__('Status'))
@@ -73,7 +73,7 @@ class Tickets extends Page implements HasForms, HasTable
                         ->searchable(),
                     Select::make('project_id')
                         ->label(__('Project'))
-                        ->options(fn () => Project::all()->pluck('name', 'id')->toArray())
+                        ->options(fn () => Project::accessibleBy(auth()->user())->pluck('name', 'id')->toArray())
                         ->searchable(),
                     Select::make('sprint_id')
                         ->label(__('Sprint'))
@@ -135,6 +135,9 @@ class Tickets extends Page implements HasForms, HasTable
                     ->whereMonth('billing_reference', $date->month);
             });
         }
+
+        $accessibleClientIds = auth()->user()->clients()->pluck('clients.id');
+        $query->whereIn('client_id', $accessibleClientIds);
 
         return $query;
     }

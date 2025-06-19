@@ -55,7 +55,7 @@ class Project extends Model implements HasMedia
 
     public function scopeAccessibleBy($query, User $user)
     {
-        $clientIds = $user->clients()->pluck('clients.id');
+        $clientIds = $user->clients()->pluck('clients.id')->toArray();
         return $query->where('owner_id', $user->id)
             ->orWhereIn('client_id', $clientIds);
     }
