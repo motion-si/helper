@@ -217,9 +217,9 @@ class SprintResource extends Resource
                             ->required()
                     ] : [])
                     ->modalSubmitAction(auth()->user()->hasRole('Project Manager')
-                        ? fn(\Filament\Support\Actions\Modal\Actions\Action $action) => $action->label(__('Add to sprint'))
+                        ? fn($action) => $action->label(__('Add to sprint'))
                         : null)
-                    ->modalCancelAction(fn(\Filament\Support\Actions\Modal\Actions\Action $action) => $action->label(__('Close')))
+                    ->modalCancelAction(fn($action) => $action->label(__('Close')))
                     ->action(function (Sprint $record, array $data) {
                         if (!isset($data['ticket_id'])) {
                             return;
